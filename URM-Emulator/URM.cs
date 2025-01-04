@@ -27,6 +27,10 @@ namespace URM_Emulator
                 _registers[index] = value;
         }
 
+        public void SetInstructions(List<string> instructions)
+        {
+            _instructions = instructions;
+        }
         private void GoToNextInstuction()
         {
             _currentInstructionId++;
@@ -53,11 +57,8 @@ namespace URM_Emulator
                     break;
 
                 case "J":
-                    J(int.Parse(terms[1]), int.Parse(terms[2]), int.Parse(terms[3])); 
+                    J(int.Parse(terms[1]), int.Parse(terms[2]), int.Parse(terms[3]));
                     break;
-                
-                default:
-                    throw new Exception("Unknown instruction");
             }
         }
         public void Z(int index)
