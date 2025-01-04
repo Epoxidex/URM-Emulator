@@ -122,7 +122,7 @@ namespace URM_Emulator
         private void StepByStepExecution()
         {
             Console.Clear();
-            Console.WriteLine("Step-by-step execution started. Press 'Enter' to execute next instruction, 'q' to quit.\n");
+            Console.WriteLine("Step-by-step execution started. Press 'Enter' to execute next instruction, 'q' to quit and complete program.\n");
 
             var oldRegisters = new Dictionary<int, int>(_urm.Registers);
 
@@ -146,7 +146,8 @@ namespace URM_Emulator
                     break;
                 }
 
-                Console.WriteLine($"Current Instruction (#{_urm.CurrentInstructionId + 1}): {_urm.Instructions[_urm.CurrentInstructionId]}\n");
+                Console.Write($"Current Instruction (#{_urm.CurrentInstructionId + 1}): ");
+                ColoredWriteLine($"{_urm.Instructions[_urm.CurrentInstructionId]}\n", ConsoleColor.Yellow);
 
                 Console.WriteLine("Registers before execution:");
                 PrintRegisters(_urm.Registers);
@@ -199,7 +200,7 @@ namespace URM_Emulator
                 Console.WriteLine("Menu:");
                 Console.WriteLine("1. Edit program");
                 Console.WriteLine("2. Execute program");
-                Console.WriteLine("4. Exit");
+                Console.WriteLine("3. Exit");
                 Console.WriteLine();
                 Console.Write("Choose an option: ");
             }
