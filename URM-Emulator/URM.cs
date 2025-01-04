@@ -5,10 +5,17 @@ namespace URM_Emulator
     public class URM
     {
         private const int TERMINATION_INSTRUCTION_ID = -1;
+        private const int STARTING_NUMBER_OF_REGISTERS = 10;
         public Dictionary<int, int> Registers { get; private set; } = new Dictionary<int, int>();
         public List<string> Instructions { get; private set; } = new List<string>();
 
         public int CurrentInstructionId { get; private set; } = 0;
+
+        public URM()
+        {
+            for (int i = 1; i <= STARTING_NUMBER_OF_REGISTERS; i++)
+                Registers[i] = 0;
+        }
         public void Reset()
         {
             Registers.Clear();

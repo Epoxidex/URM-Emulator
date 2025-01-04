@@ -67,7 +67,7 @@ namespace URM_Emulator
             builder.Append("|");
             foreach (var key in registers.Keys.OrderBy(k => k))
             {
-                builder.Append($" {key.ToString().PadLeft(columnWidth)} |");
+                builder.Append($" {('R'+key.ToString()).PadLeft(columnWidth)} |");
             }
             builder.AppendLine();
 
