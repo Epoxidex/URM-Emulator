@@ -15,6 +15,11 @@ namespace URM_Emulator
         {
             FillStartRegisters();
         }
+
+        public void DeleteAllInstructions()
+        {
+            Instructions = new List<string>();
+        }
         public void ResetRegisters()
         {
             Registers.Clear();

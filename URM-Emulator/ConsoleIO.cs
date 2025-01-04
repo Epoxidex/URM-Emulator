@@ -1,4 +1,5 @@
 ﻿using Microsoft.Win32;
+using System.IO;
 using System.Text;
 
 namespace URM_Emulator
@@ -21,59 +22,17 @@ namespace URM_Emulator
                 switch (option)
                 {
                     case 1:
-                        RunRegistersEditor();
+                        RunProgramEditor();
                         break;
                     case 2:
-                        EnterInstructions();
-                        break;
-                    case 3:
                         ExecuteInstructions();
                         break;
-                    case 4:
+                    case 3:
                         StepByStepExecution();
                         break;
-                    case 5:
+                    case 4:
                         Console.WriteLine("Exiting...");
                         return;
-                }
-            }
-        }
-
-        private void RunRegistersEditor()
-        {
-            string message = string.Empty;
-
-            while (true)
-            {
-
-                Console.Clear();
-                PrintRegisters();
-
-                Console.WriteLine(message);
-                Console.WriteLine();
-
-                Console.WriteLine("Options:");
-                Console.WriteLine("1. Set register value");
-                Console.WriteLine("2. Reset all registers");
-                Console.WriteLine("'x' to return to main menu");
-                Console.WriteLine();
-                Console.Write("Choose an option: ");
-
-                string input = Console.ReadLine()?.Trim().ToLower();
-                if (input.ToLower() == "x") break;
-
-                switch (input)
-                {
-                    case "1":
-                        message = EnterRegisters();
-                        break;
-                    case "2":
-                        _urm.ResetRegisters();
-                        message = "Registers reset.";
-                        break;
-                    default:
-                        message = "Invalid option. Try again.";
-                        break;
                 }
             }
         }
@@ -98,16 +57,85 @@ namespace URM_Emulator
             }
         }
 
-        private void EnterInstructions()
+        private void RunProgramEditor()
         {
-            Console.Clear();
-            PrintRegisters();
+            string message = string.Empty;
 
-            Console.WriteLine("Current instructions:");
-            PrintInstructions();
-            Console.ReadLine();
+            while (true)
+            {
+
+                Console.Clear();
+                PrintRegisters();
+
+                Console.WriteLine("Instruction number [0] terminates the program.");
+                Console.WriteLine("Current instructions:");
+                PrintInstructions();
+                Console.WriteLine("--------------------");
+                Console.WriteLine(message);
+                Console.WriteLine();
+
+                Console.WriteLine("Options:");
+                Console.WriteLine("1. Set register value");
+                Console.WriteLine("2. Reset all registers");
+                Console.WriteLine("3. Choose instructions from file");
+                Console.WriteLine("4. Edit instruction");
+                Console.WriteLine("5. Add instruction");
+                Console.WriteLine("6. Delete all instructions");
+                Console.WriteLine("'x' to return to main menu");
+                Console.WriteLine();
+                Console.Write("Choose an option: ");
+
+                string input = Console.ReadLine()?.Trim().ToLower();
+                if (input.ToLower() == "x") break;
+
+                switch (input)
+                {
+                    case "1":
+                        message = EnterRegisters();
+                        break;
+                    case "2":
+                        _urm.ResetRegisters();
+                        message = "Registers reset.";
+                        break;
+                    case "3":
+                        Console.Write("Enter path to file ('x' for cancelling): ");
+                        message = GetInstructionsFromFile(Console.ReadLine());
+                        break;
+                    case "4":
+                        _urm.ResetRegisters();
+                        message = "Registers reset.";
+                        break;
+                    case "5":
+                        _urm.ResetRegisters();
+                        message = "Registers reset.";
+                        break;
+                    case "6":
+                        _urm.DeleteAllInstructions();
+                        message = "Instructions deleted successfully.";
+                        break;
+                    default:
+                        message = "Invalid option. Try again.";
+                        break;
+                }
+            }
+
         }
 
+        private string GetInstructionsFromFile(string path)
+        {
+            if (path.Trim().ToLower() == "x") return "";
+
+            string text = File.ReadAllText(path);
+            try
+            {
+                _urm.SetInstructions(text);
+                return "Instructions added.";
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
         private void ExecuteInstructions()
         {
 
@@ -126,11 +154,10 @@ namespace URM_Emulator
             {
                 Console.Clear();
                 Console.WriteLine("Menu:");
-                Console.WriteLine("1. Enter or edit registers");
-                Console.WriteLine("2. Enter instructions");
-                Console.WriteLine("3. Execute instructions");
-                Console.WriteLine("4. Step-by-step execution");
-                Console.WriteLine("5. Exit");
+                Console.WriteLine("1. Edit program");
+                Console.WriteLine("2. Execute instructions");
+                Console.WriteLine("3. Step-by-step execution");
+                Console.WriteLine("4. Exit");
                 Console.WriteLine();
                 Console.Write("Choose an option: ");
             }

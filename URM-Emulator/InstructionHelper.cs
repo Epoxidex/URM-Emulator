@@ -14,19 +14,19 @@
             switch (instruction[0])
             {
                 case 'Z':
-                    if (args.Count() != 1) throw new Exception("Too many arguments for Z");
+                    if (args.Count() != 1) throw new Exception("Invalid number of arguments for Z");
                     break;
 
                 case 'S':
-                    if (args.Count() != 1) throw new Exception("Too many arguments for S");
+                    if (args.Count() != 1) throw new Exception("Invalid number of arguments for S");
                     break;
 
                 case 'M':
-                    if (args.Count() != 2) throw new Exception("Too many arguments for M");
+                    if (args.Count() != 2) throw new Exception("Invalid number of arguments for M");
                     break;
 
                 case 'J':
-                    if (args.Count() != 3) throw new Exception("Too many arguments for J");
+                    if (args.Count() != 3) throw new Exception("Invalid number of arguments for J");
                     break;
 
                 default:
