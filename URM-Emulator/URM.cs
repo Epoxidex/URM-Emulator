@@ -4,19 +4,20 @@ namespace URM_Emulator
 {
     public class URM
     {
-        private Dictionary<int, int> _registers = new Dictionary<int, int>();
-        private List<string> _instructions = new List<string>();
+        private const int TERMINATION_INSTRUCTION_ID = -1;
+        public Dictionary<int, int> Registers { get; private set; } = new Dictionary<int, int>();
+        public List<string> Instructions { get; private set; } = new List<string>();
 
-        public int _currentInstructionId = 0;
+        public int CurrentInstructionId { get; private set; } = 0;
         public void Reset()
         {
-            _registers.Clear();
+            Registers.Clear();
         }
         public int GetRegisterValue(int index)
         {
-            if (!_registers.ContainsKey(index)) 
+            if (!Registers.ContainsKey(index)) 
                 return 0;
-            return _registers[index];
+            return Registers[index];
         }
 
         public void SetRegisterValue(int index, int value)
@@ -24,24 +25,24 @@ namespace URM_Emulator
             if (value < 0)
                 throw new Exception("The register value is less than 0");
             else 
-                _registers[index] = value;
+                Registers[index] = value;
         }
 
         public void SetInstructions(string instructions)
         {
-            _instructions = InstructionHelper.ValidateInstructions(instructions);
+            Instructions = InstructionHelper.ValidateInstructions(instructions);
         }
         private void GoToNextInstuction()
         {
-            _currentInstructionId++;
+            CurrentInstructionId++;
         }
 
         public void ExecuteInstructions()
         {
-            while (_currentInstructionId != -1 && _currentInstructionId < _instructions.Count)
+            while (CurrentInstructionId != TERMINATION_INSTRUCTION_ID && CurrentInstructionId < Instructions.Count)
             {
-                Console.WriteLine(_instructions[_currentInstructionId]);
-                ExecuteInstruction(_instructions[_currentInstructionId]);
+                Console.WriteLine(Instructions[CurrentInstructionId]);
+                ExecuteInstruction(Instructions[CurrentInstructionId]);
                 PrintRegisters();
             }
         }
@@ -73,45 +74,45 @@ namespace URM_Emulator
         }
         public void Z(int index)
         {
-            _registers[index] = 0;
+            Registers[index] = 0;
         }
 
         public void S(int index)
         {
-            if (!_registers.ContainsKey(index))
-                _registers[index] = 1;
+            if (!Registers.ContainsKey(index))
+                Registers[index] = 1;
             else
-                _registers[index]++;
+                Registers[index]++;
         }
 
         public void M(int fromIndex, int toIndex)
         {
-            if (!_registers.ContainsKey(fromIndex))
-                _registers[fromIndex] = 0;
-            if (!_registers.ContainsKey(toIndex))
-                _registers[fromIndex] = 0;
+            if (!Registers.ContainsKey(fromIndex))
+                Registers[fromIndex] = 0;
+            if (!Registers.ContainsKey(toIndex))
+                Registers[toIndex] = 0;
             
-            _registers[toIndex] = _registers[fromIndex];
+            Registers[toIndex] = Registers[fromIndex];
         }
 
         public void J(int index1, int index2, int instructionId)
         {
-            if (!_registers.ContainsKey(index1))
-                _registers[index1] = 0;
-            if (!_registers.ContainsKey(index2))
-                _registers[index2] = 0;
+            if (!Registers.ContainsKey(index1))
+                Registers[index1] = 0;
+            if (!Registers.ContainsKey(index2))
+                Registers[index2] = 0;
 
-            if (_registers[index1] == _registers[index2])
-                _currentInstructionId = instructionId-1;
+            if (Registers[index1] == Registers[index2])
+                CurrentInstructionId = instructionId-1;
             else
                 GoToNextInstuction();
         }
 
         public void PrintRegisters()
         {
-            foreach (var value in _registers.Keys.ToList())
+            foreach (var key in Registers.Keys.OrderBy(k => k))
             {
-                Console.Write(_registers[value].ToString()+" ");
+                Console.Write($"{Registers[key]} ");
             }
             Console.WriteLine();
         }
