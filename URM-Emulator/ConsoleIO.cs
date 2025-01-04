@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Drawing;
 using System.Text;
 
 namespace URM_Emulator
@@ -147,15 +148,28 @@ namespace URM_Emulator
                 }
 
                 Console.Write($"Current Instruction (#{_urm.CurrentInstructionId + 1}): ");
-                ColoredWriteLine($"{_urm.Instructions[_urm.CurrentInstructionId]}\n", ConsoleColor.Yellow);
+                ColoredWriteLine($"{_urm.Instructions[_urm.CurrentInstructionId]}", ConsoleColor.Yellow);
+
+                var previousRegisters = new Dictionary<int, int>(_urm.Registers);
+                _urm.ExecuteInstruction(_urm.Instructions[_urm.CurrentInstructionId]);
+                var changedRegisters = GetChangedRegisters(previousRegisters, _urm.Registers);
+
+                if (changedRegisters != null)
+                {
+                    Console.WriteLine("Changed registers: ");
+                    foreach (var reg in changedRegisters)
+                    {
+                        ColoredWriteLine($"R{reg}: {previousRegisters[reg]} -> {_urm.Registers[reg]}", ConsoleColor.Blue);
+                    }
+                }
+                Console.WriteLine();
 
                 Console.WriteLine("Registers before execution:");
-                PrintRegisters(_urm.Registers);
 
-                _urm.ExecuteInstruction(_urm.Instructions[_urm.CurrentInstructionId]);
+                PrintRegisters(previousRegisters, changedRegisters);
 
                 Console.WriteLine("\nRegisters after execution:");
-                PrintRegisters(_urm.Registers);
+                PrintRegisters(_urm.Registers, changedRegisters);
 
                 Console.WriteLine("\nPress 'Enter' to continue, 'q' to quit step-by-step mode and complete program.");
                 var key = Console.ReadKey();
@@ -226,7 +240,7 @@ namespace URM_Emulator
             }
         }
 
-        private void PrintRegisters(Dictionary<int, int> registers)
+        private void PrintRegisters(Dictionary<int, int> registers, HashSet<int> changedRegisters = null)
         {
             if (registers.Count == 0)
             {
@@ -237,15 +251,11 @@ namespace URM_Emulator
             int columnWidth = CalculateColumnWidth(registers);
             string separator = GenerateSeparator(columnWidth, registers.Count);
 
-            var builder = new StringBuilder();
-
-            builder.AppendLine(separator);
-            builder.AppendLine(GenerateValuesRow(registers, columnWidth));
-            builder.AppendLine(separator);
-            builder.AppendLine(GenerateKeysRow(registers, columnWidth));
-            builder.AppendLine(separator);
-
-            Console.WriteLine(builder.ToString());
+            Console.WriteLine(separator);
+            PrintValuesRow(registers, columnWidth, changedRegisters);
+            Console.WriteLine(separator);
+            PrintKeysRow(registers, columnWidth, changedRegisters);
+            Console.WriteLine(separator);
         }
 
         private int CalculateColumnWidth(Dictionary<int, int> registers)
@@ -258,26 +268,40 @@ namespace URM_Emulator
             return new string('-', (columnWidth + 3) * columnCount + 1);
         }
 
-        private string GenerateValuesRow(Dictionary<int, int> registers, int columnWidth)
+        private void PrintValuesRow(Dictionary<int, int> registers, int columnWidth, HashSet<int> changedValues = null)
         {
-            var builder = new StringBuilder();
-            builder.Append("|");
+            Console.Write("|");
             foreach (var value in registers.Keys.OrderBy(k => k))
             {
-                builder.Append($" {registers[value].ToString().PadLeft(columnWidth)} |");
+                if (changedValues != null && changedValues.Contains(value))
+                {
+                    ColoredWrite($" {registers[value].ToString().PadLeft(columnWidth)} ", ConsoleColor.Blue);
+                    Console.Write("|");
+                }
+                else
+                {
+                    Console.Write($" {registers[value].ToString().PadLeft(columnWidth)} |");
+                }
             }
-            return builder.ToString();
+            Console.WriteLine();
         }
 
-        private string GenerateKeysRow(Dictionary<int, int> registers, int columnWidth)
+        private void PrintKeysRow(Dictionary<int, int> registers, int columnWidth, HashSet<int> changedValues = null)
         {
-            var builder = new StringBuilder();
-            builder.Append("|");
+            Console.Write("|");
             foreach (var key in registers.Keys.OrderBy(k => k))
             {
-                builder.Append($" {('R' + key.ToString()).PadLeft(columnWidth)} |");
+                if (changedValues != null && changedValues.Contains(key))
+                {
+                    ColoredWrite($" {('R' + key.ToString()).PadLeft(columnWidth)} ", ConsoleColor.Blue);
+                    Console.Write("|");
+                }
+                else
+                {
+                    Console.Write($" {('R' + key.ToString()).PadLeft(columnWidth)} |");
+                }
             }
-            return builder.ToString();
+            Console.WriteLine();
         }
 
         private void ColoredWriteLine(string message, ConsoleColor color)
@@ -286,6 +310,39 @@ namespace URM_Emulator
             Console.ForegroundColor = color;
             Console.WriteLine(message);
             Console.ForegroundColor = previousColor;
+        }
+        private void ColoredWrite(string message, ConsoleColor color)
+        {
+            var previousColor = Console.ForegroundColor;
+            Console.ForegroundColor = color;
+            Console.Write(message);
+            Console.ForegroundColor = previousColor;
+        }
+
+        private HashSet<int> GetChangedRegisters(Dictionary<int, int> regs1, Dictionary<int, int> regs2)
+        {
+            HashSet<int> changedKeys = new HashSet<int>();
+
+            foreach (var keyValuePair in regs1)
+            {
+                int key = keyValuePair.Key;
+                if (!regs2.TryGetValue(key, out int value2) || keyValuePair.Value != value2)
+                {
+                    changedKeys.Add(key);
+                }
+            }
+
+            foreach (var keyValuePair in regs2)
+            {
+                int key = keyValuePair.Key;
+                if (!regs1.ContainsKey(key))
+                {
+                    changedKeys.Add(key);
+                }
+            }
+
+
+            return changedKeys;
         }
     }
 }
