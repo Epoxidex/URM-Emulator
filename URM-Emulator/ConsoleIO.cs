@@ -1,5 +1,4 @@
-﻿using Microsoft.Win32;
-using System.IO;
+﻿using System.ComponentModel;
 using System.Text;
 
 namespace URM_Emulator
@@ -122,7 +121,7 @@ namespace URM_Emulator
             Console.Clear();
             PrintProgram();
 
-            var oldRegisters = new Dictionary<int,int>(_urm.Registers);
+            var oldRegisters = new Dictionary<int, int>(_urm.Registers);
             _urm.ExecuteInstructions();
             Console.WriteLine("Registers after execution: ");
             PrintRegisters(_urm.Registers);
@@ -134,8 +133,8 @@ namespace URM_Emulator
                 input = Console.ReadLine().Trim().ToLower();
             }
             while (input != "n" && input != "y");
-            
-            if (input == "n") 
+
+            if (input == "n")
                 _urm.SetRegistersValues(oldRegisters);
         }
 
@@ -154,7 +153,9 @@ namespace URM_Emulator
                 for (int i = 0; i < _urm.Instructions.Count; i++)
                 {
                     string pointer = i == _urm.CurrentInstructionId ? "->" : "  ";
-                    Console.WriteLine($"{pointer} {i + 1}: {_urm.Instructions[i]}");
+                    var color = i == _urm.CurrentInstructionId ? ConsoleColor.Yellow : ConsoleColor.DarkYellow;
+                    ColoredWriteLine($"{pointer} {i + 1}: {_urm.Instructions[i]}", color);
+                    Console.ForegroundColor = ConsoleColor.Gray;
                 }
                 Console.WriteLine("\n-------------------\n");
 
@@ -240,7 +241,7 @@ namespace URM_Emulator
             var instructions = _urm.Instructions;
             for (int i = 0; i < _urm.Instructions.Count; i++)
             {
-                Console.WriteLine($"[{i+1}] {instructions[i]}");
+                Console.WriteLine($"[{i + 1}] {instructions[i]}");
             }
         }
 
@@ -298,5 +299,12 @@ namespace URM_Emulator
             return builder.ToString();
         }
 
+        private void ColoredWriteLine(string message, ConsoleColor color)
+        {
+            var previousColor = Console.ForegroundColor;
+            Console.ForegroundColor = color;
+            Console.WriteLine(message);
+            Console.ForegroundColor = previousColor;
+        }
     }
 }
