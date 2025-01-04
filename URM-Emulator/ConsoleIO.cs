@@ -46,6 +46,7 @@ namespace URM_Emulator
             Console.Write(" > ");
             try
             {
+                Console.ForegroundColor = ConsoleColor.Yellow;
                 var input = Console.ReadLine().Split(':').Select(s => int.Parse(s.Trim())).ToList();
                 _urm.SetRegisterValue(input[0], input[1]);
                 return $"The register R{input[0]} is set to a value '{input[1]}'";
@@ -53,6 +54,10 @@ namespace URM_Emulator
             catch (Exception ex)
             {
                 return ex.Message;
+            }
+            finally
+            {
+                Console.ForegroundColor = ConsoleColor.Gray;
             }
         }
 
@@ -66,7 +71,7 @@ namespace URM_Emulator
                 Console.Clear();
                 PrintProgram();
 
-                Console.WriteLine(message);
+                ColoredWriteLine(message, ConsoleColor.Cyan);
                 Console.WriteLine();
 
                 Console.WriteLine("Options:");
@@ -231,7 +236,7 @@ namespace URM_Emulator
         private void PrintProgram()
         {
             PrintRegisters(_urm.Registers);
-            Console.WriteLine("Use instruction number [0] to terminate the program.");
+            ColoredWriteLine("Use instruction number [0] to terminate the program.", ConsoleColor.DarkYellow);
             Console.WriteLine("Current instructions:");
             PrintInstructions();
             Console.WriteLine("--------------------");
