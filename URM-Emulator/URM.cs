@@ -13,12 +13,18 @@ namespace URM_Emulator
 
         public URM()
         {
-            for (int i = 1; i <= STARTING_NUMBER_OF_REGISTERS; i++)
-                Registers[i] = 0;
+            FillStartRegisters();
         }
-        public void Reset()
+        public void ResetRegisters()
         {
             Registers.Clear();
+            FillStartRegisters();
+        }
+
+        private void FillStartRegisters()
+        {
+            for (int i = 1; i <= STARTING_NUMBER_OF_REGISTERS; i++)
+                Registers[i] = 0;
         }
         public int GetRegisterValue(int index)
         {
@@ -29,6 +35,8 @@ namespace URM_Emulator
 
         public void SetRegisterValue(int index, int value)
         {
+            if (index < 1)
+                throw new Exception("The register number is less than 1");
             if (value < 0)
                 throw new Exception("The register value is less than 0");
             else 
