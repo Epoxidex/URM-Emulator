@@ -78,9 +78,6 @@ namespace URM_Emulator
                 Console.WriteLine("1. Set register value");
                 Console.WriteLine("2. Reset all registers");
                 Console.WriteLine("3. Choose instructions from file");
-                Console.WriteLine("4. Edit instruction");
-                Console.WriteLine("5. Add instruction");
-                Console.WriteLine("6. Delete all instructions");
                 Console.WriteLine("'x' to return to main menu");
                 Console.WriteLine();
                 Console.Write("Choose an option: ");
@@ -100,18 +97,6 @@ namespace URM_Emulator
                     case "3":
                         Console.Write("Enter path to file ('x' for cancelling): ");
                         message = GetInstructionsFromFile(Console.ReadLine());
-                        break;
-                    case "4":
-                        _urm.ResetRegisters();
-                        message = "Registers reset.";
-                        break;
-                    case "5":
-                        _urm.ResetRegisters();
-                        message = "Registers reset.";
-                        break;
-                    case "6":
-                        _urm.DeleteAllInstructions();
-                        message = "Instructions deleted successfully.";
                         break;
                     default:
                         message = "Invalid option. Try again.";
