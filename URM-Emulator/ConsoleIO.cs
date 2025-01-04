@@ -125,7 +125,7 @@ namespace URM_Emulator
             var oldRegisters = new Dictionary<int,int>(_urm.Registers);
             _urm.ExecuteInstructions();
             Console.WriteLine("Registers after execution: ");
-            PrintRegisters();
+            PrintRegisters(_urm.Registers);
 
             string input;
             do
@@ -141,8 +141,70 @@ namespace URM_Emulator
 
         private void StepByStepExecution()
         {
+            Console.Clear();
+            Console.WriteLine("Step-by-step execution started. Press 'Enter' to execute next instruction, 'q' to quit.\n");
 
+            var oldRegisters = new Dictionary<int, int>(_urm.Registers);
+
+            while (_urm.CurrentInstructionId < _urm.Instructions.Count)
+            {
+                Console.Clear();
+
+                Console.WriteLine("Program Code:\n-------------------");
+                for (int i = 0; i < _urm.Instructions.Count; i++)
+                {
+                    string pointer = i == _urm.CurrentInstructionId ? "->" : "  ";
+                    Console.WriteLine($"{pointer} {i + 1}: {_urm.Instructions[i]}");
+                }
+                Console.WriteLine("\n-------------------\n");
+
+                if (_urm.CurrentInstructionId >= _urm.Instructions.Count || _urm.CurrentInstructionId < 0)
+                {
+                    Console.WriteLine("Program completed\n");
+                    break;
+                }
+
+                Console.WriteLine($"Current Instruction (#{_urm.CurrentInstructionId + 1}): {_urm.Instructions[_urm.CurrentInstructionId]}\n");
+
+                Console.WriteLine("Registers before execution:");
+                PrintRegisters(_urm.Registers);
+
+                _urm.ExecuteInstruction(_urm.Instructions[_urm.CurrentInstructionId]);
+
+                Console.WriteLine("\nRegisters after execution:");
+                PrintRegisters(_urm.Registers);
+
+                Console.WriteLine("\nPress 'Enter' to continue, 'q' to quit step-by-step mode and complete program.");
+                var key = Console.ReadKey();
+
+                if (key.Key == ConsoleKey.Q)
+                {
+                    _urm.ExecuteInstructions();
+                    break;
+                }
+            }
+
+            _urm.GoToFirstInstruction();
+
+            Console.Clear();
+            Console.WriteLine("Program completed");
+            Console.WriteLine("Old registers:");
+            PrintRegisters(oldRegisters);
+            Console.WriteLine("New registers:");
+            PrintRegisters(_urm.Registers);
+
+            string input;
+            do
+            {
+                Console.WriteLine("\nSave new register values? [y/n]");
+                input = Console.ReadLine().Trim().ToLower();
+            } while (input != "y" && input != "n");
+
+
+            if (input == "n")
+                _urm.SetRegistersValues(oldRegisters);
         }
+
 
 
         private int ShowMenu()
@@ -167,7 +229,7 @@ namespace URM_Emulator
 
         private void PrintProgram()
         {
-            PrintRegisters();
+            PrintRegisters(_urm.Registers);
             Console.WriteLine("Use instruction number [0] to terminate the program.");
             Console.WriteLine("Current instructions:");
             PrintInstructions();
@@ -182,10 +244,8 @@ namespace URM_Emulator
             }
         }
 
-        private void PrintRegisters()
+        private void PrintRegisters(Dictionary<int, int> registers)
         {
-            var registers = _urm.Registers;
-
             if (registers.Count == 0)
             {
                 Console.WriteLine("No registers to display.");
