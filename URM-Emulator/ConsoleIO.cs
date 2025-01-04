@@ -65,12 +65,8 @@ namespace URM_Emulator
             {
 
                 Console.Clear();
-                PrintRegisters();
+                PrintProgram();
 
-                Console.WriteLine("Instruction number [0] terminates the program.");
-                Console.WriteLine("Current instructions:");
-                PrintInstructions();
-                Console.WriteLine("--------------------");
                 Console.WriteLine(message);
                 Console.WriteLine();
 
@@ -131,6 +127,7 @@ namespace URM_Emulator
 
         }
 
+
         private int ShowMenu()
         {
             int option;
@@ -151,6 +148,14 @@ namespace URM_Emulator
             return option;
         }
 
+        private void PrintProgram()
+        {
+            PrintRegisters();
+            Console.WriteLine("Use instruction number [0] to terminate the program.");
+            Console.WriteLine("Current instructions:");
+            PrintInstructions();
+            Console.WriteLine("--------------------");
+        }
         private void PrintInstructions()
         {
             var instructions = _urm.Instructions;
