@@ -100,7 +100,12 @@ namespace URM_Emulator
 
         private void EnterInstructions()
         {
+            Console.Clear();
+            PrintRegisters();
 
+            Console.WriteLine("Current instructions:");
+            PrintInstructions();
+            Console.ReadLine();
         }
 
         private void ExecuteInstructions()
@@ -132,6 +137,15 @@ namespace URM_Emulator
             while (!int.TryParse(Console.ReadLine(), out option));
 
             return option;
+        }
+
+        private void PrintInstructions()
+        {
+            var instructions = _urm.Instructions;
+            for (int i = 0; i < _urm.Instructions.Count; i++)
+            {
+                Console.WriteLine($"[{i+1}] {instructions[i]}");
+            }
         }
 
         private void PrintRegisters()
