@@ -24,12 +24,9 @@ namespace URM_Emulator
                         RunProgramEditor();
                         break;
                     case 2:
-                        ExecuteInstructions();
-                        break;
-                    case 3:
                         StepByStepExecution();
                         break;
-                    case 4:
+                    case 3:
                         Console.WriteLine("Exiting...");
                         return;
                 }
@@ -121,27 +118,6 @@ namespace URM_Emulator
                 return ex.Message;
             }
         }
-        private void ExecuteInstructions()
-        {
-            Console.Clear();
-            PrintProgram();
-
-            var oldRegisters = new Dictionary<int, int>(_urm.Registers);
-            _urm.ExecuteInstructions();
-            Console.WriteLine("Registers after execution: ");
-            PrintRegisters(_urm.Registers);
-
-            string input;
-            do
-            {
-                Console.WriteLine("Save new values for registers? [y/n]");
-                input = Console.ReadLine().Trim().ToLower();
-            }
-            while (input != "n" && input != "y");
-
-            if (input == "n")
-                _urm.SetRegistersValues(oldRegisters);
-        }
 
         private void StepByStepExecution()
         {
@@ -222,8 +198,7 @@ namespace URM_Emulator
                 Console.Clear();
                 Console.WriteLine("Menu:");
                 Console.WriteLine("1. Edit program");
-                Console.WriteLine("2. Execute instructions");
-                Console.WriteLine("3. Step-by-step execution");
+                Console.WriteLine("2. Execute program");
                 Console.WriteLine("4. Exit");
                 Console.WriteLine();
                 Console.Write("Choose an option: ");
