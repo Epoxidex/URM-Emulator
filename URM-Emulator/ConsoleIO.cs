@@ -49,32 +49,51 @@ namespace URM_Emulator
         {
             var registers = _urm.Registers;
 
+            int columnWidth = CalculateColumnWidth(registers);
+            string separator = GenerateSeparator(columnWidth, registers.Count);
 
             var builder = new StringBuilder();
-            int columnWidth = Math.Max(registers.Values.Max(), registers.Keys.Max()).ToString().Length + 2;
 
-            builder.AppendLine(new string('-', (columnWidth + 3) * registers.Count + 1));
-
-            builder.Append("|");
-            foreach (var key in registers.Keys.OrderBy(k => k))
-            {
-                builder.Append($" {registers[key].ToString().PadLeft(columnWidth)} |");
-            }
-            builder.AppendLine();
-
-            builder.AppendLine(new string('-', (columnWidth + 3) * registers.Count + 1));
-
-            builder.Append("|");
-            foreach (var key in registers.Keys.OrderBy(k => k))
-            {
-                builder.Append($" {('R'+key.ToString()).PadLeft(columnWidth)} |");
-            }
-            builder.AppendLine();
-
-            builder.AppendLine(new string('-', (columnWidth + 3) * registers.Count + 1));
+            builder.AppendLine(separator);
+            builder.AppendLine(GenerateValuesRow(registers, columnWidth));
+            builder.AppendLine(separator);
+            builder.AppendLine(GenerateKeysRow(registers, columnWidth));
+            builder.AppendLine(separator);
 
             Console.WriteLine(builder.ToString());
-
         }
+
+        private int CalculateColumnWidth(Dictionary<int, int> registers)
+        {
+            return Math.Max(registers.Values.Max(), registers.Keys.Max()).ToString().Length + 2;
+        }
+
+        private string GenerateSeparator(int columnWidth, int columnCount)
+        {
+            return new string('-', (columnWidth + 3) * columnCount + 1);
+        }
+
+        private string GenerateValuesRow(Dictionary<int, int> registers, int columnWidth)
+        {
+            var builder = new StringBuilder();
+            builder.Append("|");
+            foreach (var value in registers.Values.OrderBy(k => k))
+            {
+                builder.Append($" {value.ToString().PadLeft(columnWidth)} |");
+            }
+            return builder.ToString();
+        }
+
+        private string GenerateKeysRow(Dictionary<int, int> registers, int columnWidth)
+        {
+            var builder = new StringBuilder();
+            builder.Append("|");
+            foreach (var key in registers.Keys.OrderBy(k => k))
+            {
+                builder.Append($" {('R' + key.ToString()).PadLeft(columnWidth)} |");
+            }
+            return builder.ToString();
+        }
+
     }
 }
