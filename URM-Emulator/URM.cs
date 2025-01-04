@@ -1,16 +1,17 @@
-﻿namespace URM_Emulator
+﻿using System;
+
+namespace URM_Emulator
 {
     public class URM
     {
         private Dictionary<int, int> _registers = new Dictionary<int, int>();
-        private List<Instruction> _instructions = new List<Instruction>();
+        private List<string> _instructions = new List<string>();
 
         public int _currentInstructionId = 0;
         public void Reset()
         {
             _registers.Clear();
         }
-
         public int GetRegisterValue(int index)
         {
             if (!_registers.ContainsKey(index)) 
@@ -26,11 +27,42 @@
                 _registers[index] = value;
         }
 
+        private void GoToNextInstuction()
+        {
+            _currentInstructionId++;
+        }
+        public void ExecuteInstruction(string instruction)
+        {
+            var terms = instruction.Split(' ');
+
+            switch (terms[0].ToUpper())
+            {
+                case "Z": 
+                    Z(int.Parse(terms[1]));
+                    GoToNextInstuction();
+                    break;
+
+                case "S": 
+                    S(int.Parse(terms[1]));
+                    GoToNextInstuction();
+                    break;
+
+                case "M": 
+                    M(int.Parse(terms[1]), int.Parse(terms[2]));
+                    GoToNextInstuction();
+                    break;
+
+                case "J":
+                    J(int.Parse(terms[1]), int.Parse(terms[2]), int.Parse(terms[3])); 
+                    break;
+                
+                default:
+                    throw new Exception("Unknown instruction");
+            }
+        }
         public void Z(int index)
         {
             _registers[index] = 0;
-
-            _currentInstructionId++;
         }
 
         public void S(int index)
@@ -39,11 +71,9 @@
                 _registers[index] = 1;
             else
                 _registers[index]++;
-
-            _currentInstructionId++;
         }
 
-        public void T(int fromIndex, int toIndex)
+        public void M(int fromIndex, int toIndex)
         {
             if (!_registers.ContainsKey(fromIndex))
                 _registers[fromIndex] = 0;
@@ -51,8 +81,6 @@
                 _registers[fromIndex] = 0;
             
             _registers[toIndex] = _registers[fromIndex];
-
-            _currentInstructionId++;
         }
 
         public void J(int index1, int index2, int instructionId)
