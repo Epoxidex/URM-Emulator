@@ -5,7 +5,7 @@ namespace URM_Emulator
     public class URM
     {
         private const int TERMINATION_INSTRUCTION_ID = -1;
-        private const int STARTING_NUMBER_OF_REGISTERS = 5;
+        private const int STARTING_NUMBER_OF_REGISTERS = 0;
         public Dictionary<int, int> Registers { get; private set; } = new Dictionary<int, int>();
         public List<string> Instructions { get; private set; } = new List<string>();
 

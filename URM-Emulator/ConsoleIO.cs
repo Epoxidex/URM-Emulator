@@ -122,9 +122,6 @@ namespace URM_Emulator
 
         private void StepByStepExecution()
         {
-            Console.Clear();
-            Console.WriteLine("Step-by-step execution started. Press 'Enter' to execute next instruction, 'q' to quit and complete program.\n");
-
             var oldRegisters = new Dictionary<int, int>(_urm.Registers);
 
             while (_urm.CurrentInstructionId < _urm.Instructions.Count)
@@ -159,7 +156,7 @@ namespace URM_Emulator
                     Console.WriteLine("Changed registers: ");
                     foreach (var reg in changedRegisters)
                     {
-                        ColoredWriteLine($"R{reg}: {previousRegisters[reg]} -> {_urm.Registers[reg]}", ConsoleColor.Blue);
+                        ColoredWriteLine($"R{reg}: {(previousRegisters.ContainsKey(reg) ? previousRegisters[reg] : 0)} -> {_urm.Registers[reg]}", ConsoleColor.Blue);
                     }
                 }
                 Console.WriteLine();
