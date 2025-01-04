@@ -27,13 +27,18 @@ namespace URM_Emulator
                 _registers[index] = value;
         }
 
-        public void SetInstructions(List<string> instructions)
+        public void SetInstructions(string instructions)
         {
-            _instructions = instructions;
+            _instructions = InstructionHelper.ValidateInstructions(instructions);
         }
         private void GoToNextInstuction()
         {
             _currentInstructionId++;
+        }
+
+        public void ExecuteInstructions()
+        {
+            ExecuteInstruction(_instructions[_currentInstructionId]);
         }
         public void ExecuteInstruction(string instruction)
         {
