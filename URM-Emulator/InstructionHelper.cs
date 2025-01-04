@@ -49,6 +49,7 @@
 
         public static List<string> ValidateInstructions(string instructions)
         {
+            instructions = instructions.Trim();
             while (instructions.Contains("\n\n"))
                 instructions = instructions.Replace("\n\n", "\n");
 

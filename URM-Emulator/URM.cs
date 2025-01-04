@@ -38,7 +38,12 @@ namespace URM_Emulator
 
         public void ExecuteInstructions()
         {
-            ExecuteInstruction(_instructions[_currentInstructionId]);
+            while (_currentInstructionId != -1 && _currentInstructionId < _instructions.Count)
+            {
+                Console.WriteLine(_instructions[_currentInstructionId]);
+                ExecuteInstruction(_instructions[_currentInstructionId]);
+                PrintRegisters();
+            }
         }
         public void ExecuteInstruction(string instruction)
         {
@@ -97,9 +102,9 @@ namespace URM_Emulator
                 _registers[index2] = 0;
 
             if (_registers[index1] == _registers[index2])
-                _currentInstructionId = instructionId;
+                _currentInstructionId = instructionId-1;
             else
-                _currentInstructionId++;
+                GoToNextInstuction();
         }
 
         public void PrintRegisters()
