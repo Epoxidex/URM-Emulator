@@ -41,9 +41,7 @@ namespace URM_Emulator
         {
             while (CurrentInstructionId != TERMINATION_INSTRUCTION_ID && CurrentInstructionId < Instructions.Count)
             {
-                Console.WriteLine(Instructions[CurrentInstructionId]);
                 ExecuteInstruction(Instructions[CurrentInstructionId]);
-                PrintRegisters();
             }
         }
         public void ExecuteInstruction(string instruction)
@@ -106,15 +104,6 @@ namespace URM_Emulator
                 CurrentInstructionId = instructionId-1;
             else
                 GoToNextInstuction();
-        }
-
-        public void PrintRegisters()
-        {
-            foreach (var key in Registers.Keys.OrderBy(k => k))
-            {
-                Console.Write($"{Registers[key]} ");
-            }
-            Console.WriteLine();
         }
     }
 }
