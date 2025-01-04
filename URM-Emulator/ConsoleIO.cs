@@ -80,11 +80,12 @@ namespace URM_Emulator
 
         private string EnterRegisters()
         {
-            Console.Write("\nEnter register number and value in format ");
+            Console.Write("\nEnter register number and value in the following format: ");
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.Write("number:value");
+            Console.WriteLine("register_number:value");
             Console.ForegroundColor = ConsoleColor.Gray;
-            Console.Write("\n > ");
+            Console.WriteLine("For example: 1:42, to set the value 42 in register R1.");
+            Console.Write(" > ");
             try
             {
                 var input = Console.ReadLine().Split(':').Select(s => int.Parse(s.Trim())).ToList();
