@@ -119,7 +119,24 @@ namespace URM_Emulator
         }
         private void ExecuteInstructions()
         {
+            Console.Clear();
+            PrintProgram();
 
+            var oldRegisters = new Dictionary<int,int>(_urm.Registers);
+            _urm.ExecuteInstructions();
+            Console.WriteLine("Registers after execution: ");
+            PrintRegisters();
+
+            string input;
+            do
+            {
+                Console.WriteLine("Save new values for registers? [y/n]");
+                input = Console.ReadLine().Trim().ToLower();
+            }
+            while (input != "n" && input != "y");
+            
+            if (input == "n") 
+                _urm.SetRegistersValues(oldRegisters);
         }
 
         private void StepByStepExecution()

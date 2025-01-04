@@ -48,13 +48,25 @@ namespace URM_Emulator
                 Registers[index] = value;
         }
 
+        public void SetRegistersValues(Dictionary<int, int> values)
+        {
+            if (values.Keys.Any(x => x < 1) || values.Values.Any(x => x < 0))
+                throw new Exception("Found invalid register number or value");
+            Registers = values;
+        }
+
         public void SetInstructions(string instructions)
         {
             Instructions = InstructionHelper.ValidateInstructions(instructions);
         }
-        private void GoToNextInstuction()
+        public void GoToNextInstuction()
         {
             CurrentInstructionId++;
+        }
+
+        public void GoToFirstInstruction()
+        {
+            CurrentInstructionId = 0;
         }
 
         public void ExecuteInstructions()
@@ -63,6 +75,7 @@ namespace URM_Emulator
             {
                 ExecuteInstruction(Instructions[CurrentInstructionId]);
             }
+            GoToFirstInstruction();
         }
         public void ExecuteInstruction(string instruction)
         {
