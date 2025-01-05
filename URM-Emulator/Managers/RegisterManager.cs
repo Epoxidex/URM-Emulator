@@ -1,4 +1,6 @@
-﻿namespace URM_Emulator.Managers
+﻿using System.Text.RegularExpressions;
+
+namespace URM_Emulator.Managers
 {
     public class RegisterManager
     {
@@ -10,6 +12,50 @@
             _urm = urm;
         }
 
+        public List<int> SetRegisterValueFromString(string registerData, char sep = ':')
+        {
+            if (string.IsNullOrEmpty(registerData))
+            {
+                throw new ArgumentNullException(nameof(registerData), "Input string cannot be null or empty.");
+            }
+
+            string[] parts = registerData.Split(sep);
+            if (parts.Length != 2)
+            {
+                throw new FormatException("Invalid input string format. Expected format is 'register_number:value'.");
+            }
+
+            if (!int.TryParse(parts[0].Trim(), out int registerNumber))
+            {
+                throw new FormatException("Invalid register number format. Expected a positive integer.");
+            }
+
+            if (!int.TryParse(parts[1].Trim(), out int registerValue))
+            {
+                throw new FormatException("Invalid register value format. Expected a non-negative integer.");
+            }
+
+            _urm.SetRegisterValue(registerNumber, registerValue);
+            return new List<int>([registerNumber, registerValue]);
+        }
+
+        public List<List<int>> SetMultipleRegistersFromString(string input, char sep = ':')
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                throw new ArgumentNullException(nameof(input), "Input string cannot be null or empty.");
+            }
+
+            string normalizedInput = Regex.Replace(input, @"\s+", " ").Trim();
+
+            var result = new List<List<int>>();
+            foreach (string registerData in normalizedInput.Split(' '))
+            {
+                result.Add(SetRegisterValueFromString(registerData, sep: sep));
+            }
+            return result;
+        }
+
         public string EnterRegisters()
         {
             Console.Write("\nEnter register number and value in the following format: ");
@@ -19,9 +65,8 @@
             try
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                var input = Console.ReadLine().Split(':').Select(s => int.Parse(s.Trim())).ToList();
-                _urm.SetRegisterValue(input[0], input[1]);
-                return $"The register R{input[0]} is set to a value '{input[1]}'";
+                var regData = SetRegisterValueFromString(Console.ReadLine());
+                return $"The register R{regData[0]} is set to a value '{regData[1]}'";
             }
             catch (Exception ex)
             {
