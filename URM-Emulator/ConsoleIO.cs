@@ -47,7 +47,8 @@ namespace URM_Emulator
         {
             Console.Clear();
             Console.WriteLine("Choose example");
-            Console.WriteLine("1. Sum of two numbers");
+            Console.WriteLine("1. Sum of two numbers | R1+R2");
+            Console.WriteLine("2. Maximum of three numbers | max(R1, R2, R3)");
 
             string input = Console.ReadLine()?.Trim().ToLower();
             if (input.ToLower() == "x")
@@ -60,7 +61,12 @@ namespace URM_Emulator
                     RenderManager.ColoredWriteLine("Program Loaded!", ConsoleColor.Cyan);
                     Console.ReadKey();
                 break;
+                case "2":
+                    _programManager.LoadProgramFromFile("Examples\\Maximum of three numbers.txt");
+                    break;
             }
+            RenderManager.ColoredWriteLine("Program Loaded!", ConsoleColor.Cyan);
+            Console.ReadKey();
         }
         private void RunProgramEditor()
         {
