@@ -69,7 +69,7 @@ namespace URM_Emulator
                 Console.Clear();
                 PrintProgram();
 
-                ColoredWriteLine(message, ConsoleColor.Cyan);
+                RenderManager.ColoredWriteLine(message, ConsoleColor.Cyan);
                 Console.WriteLine();
 
                 Console.WriteLine("Options:");
@@ -133,7 +133,7 @@ namespace URM_Emulator
                 {
                     string pointer = i == _urm.CurrentInstructionId ? "->" : "  ";
                     var color = i == _urm.CurrentInstructionId ? ConsoleColor.Yellow : ConsoleColor.DarkYellow;
-                    ColoredWriteLine($"{pointer} {i + 1}: {_urm.Instructions[i]}", color);
+                    RenderManager.ColoredWriteLine($"{pointer} {i + 1}: {_urm.Instructions[i]}", color);
                     Console.ForegroundColor = ConsoleColor.Gray;
                 }
                 Console.WriteLine("\n-------------------\n");
@@ -145,7 +145,7 @@ namespace URM_Emulator
                 }
 
                 Console.Write($"Current Instruction (#{_urm.CurrentInstructionId + 1}): ");
-                ColoredWriteLine($"{_urm.Instructions[_urm.CurrentInstructionId]}", ConsoleColor.Yellow);
+                RenderManager.ColoredWriteLine($"{_urm.Instructions[_urm.CurrentInstructionId]}", ConsoleColor.Yellow);
 
                 var previousRegisters = new Dictionary<int, int>(_urm.Registers);
                 _urm.ExecuteInstruction(_urm.Instructions[_urm.CurrentInstructionId]);
@@ -156,17 +156,17 @@ namespace URM_Emulator
                     Console.WriteLine("Changed registers: ");
                     foreach (var reg in changedRegisters)
                     {
-                        ColoredWriteLine($"R{reg}: {(previousRegisters.ContainsKey(reg) ? previousRegisters[reg] : 0)} -> {_urm.Registers[reg]}", ConsoleColor.Blue);
+                        RenderManager.ColoredWriteLine($"R{reg}: {(previousRegisters.ContainsKey(reg) ? previousRegisters[reg] : 0)} -> {_urm.Registers[reg]}", ConsoleColor.Blue);
                     }
                 }
                 Console.WriteLine();
 
                 Console.WriteLine("Registers before execution:");
 
-                PrintRegisters(previousRegisters, changedRegisters);
+                RenderManager.PrintRegisters(previousRegisters, changedRegisters);
 
                 Console.WriteLine("\nRegisters after execution:");
-                PrintRegisters(_urm.Registers, changedRegisters);
+                RenderManager.PrintRegisters(_urm.Registers, changedRegisters);
 
                 Console.WriteLine("\nPress 'Enter' to continue, 'q' to quit step-by-step mode and complete program.");
                 var key = Console.ReadKey();
@@ -183,9 +183,9 @@ namespace URM_Emulator
             Console.Clear();
             Console.WriteLine("Program completed");
             Console.WriteLine("Old registers:");
-            PrintRegisters(oldRegisters);
+            RenderManager.PrintRegisters(oldRegisters);
             Console.WriteLine("New registers:");
-            PrintRegisters(_urm.Registers);
+            RenderManager.PrintRegisters(_urm.Registers);
 
             string input;
             do
@@ -222,8 +222,8 @@ namespace URM_Emulator
 
         private void PrintProgram()
         {
-            PrintRegisters(_urm.Registers);
-            ColoredWriteLine("Use instruction number [0] to terminate the program.", ConsoleColor.DarkYellow);
+            RenderManager.PrintRegisters(_urm.Registers);
+            RenderManager.ColoredWriteLine("Use instruction number [0] to terminate the program.", ConsoleColor.DarkYellow);
             Console.WriteLine("Current instructions:");
             PrintInstructions();
             Console.WriteLine("--------------------");
@@ -235,85 +235,6 @@ namespace URM_Emulator
             {
                 Console.WriteLine($"[{i + 1}] {instructions[i]}");
             }
-        }
-
-        private void PrintRegisters(Dictionary<int, int> registers, HashSet<int> changedRegisters = null)
-        {
-            if (registers.Count == 0)
-            {
-                Console.WriteLine("No registers to display.");
-                return;
-            }
-
-            int columnWidth = CalculateColumnWidth(registers);
-            string separator = GenerateSeparator(columnWidth, registers.Count);
-
-            Console.WriteLine(separator);
-            PrintValuesRow(registers, columnWidth, changedRegisters);
-            Console.WriteLine(separator);
-            PrintKeysRow(registers, columnWidth, changedRegisters);
-            Console.WriteLine(separator);
-        }
-
-        private int CalculateColumnWidth(Dictionary<int, int> registers)
-        {
-            return Math.Max(registers.Values.Max(), registers.Keys.Max()).ToString().Length + 2;
-        }
-
-        private string GenerateSeparator(int columnWidth, int columnCount)
-        {
-            return new string('-', (columnWidth + 3) * columnCount + 1);
-        }
-
-        private void PrintValuesRow(Dictionary<int, int> registers, int columnWidth, HashSet<int> changedValues = null)
-        {
-            Console.Write("|");
-            foreach (var value in registers.Keys.OrderBy(k => k))
-            {
-                if (changedValues != null && changedValues.Contains(value))
-                {
-                    ColoredWrite($" {registers[value].ToString().PadLeft(columnWidth)} ", ConsoleColor.Blue);
-                    Console.Write("|");
-                }
-                else
-                {
-                    Console.Write($" {registers[value].ToString().PadLeft(columnWidth)} |");
-                }
-            }
-            Console.WriteLine();
-        }
-
-        private void PrintKeysRow(Dictionary<int, int> registers, int columnWidth, HashSet<int> changedValues = null)
-        {
-            Console.Write("|");
-            foreach (var key in registers.Keys.OrderBy(k => k))
-            {
-                if (changedValues != null && changedValues.Contains(key))
-                {
-                    ColoredWrite($" {('R' + key.ToString()).PadLeft(columnWidth)} ", ConsoleColor.Blue);
-                    Console.Write("|");
-                }
-                else
-                {
-                    Console.Write($" {('R' + key.ToString()).PadLeft(columnWidth)} |");
-                }
-            }
-            Console.WriteLine();
-        }
-
-        private void ColoredWriteLine(string message, ConsoleColor color)
-        {
-            var previousColor = Console.ForegroundColor;
-            Console.ForegroundColor = color;
-            Console.WriteLine(message);
-            Console.ForegroundColor = previousColor;
-        }
-        private void ColoredWrite(string message, ConsoleColor color)
-        {
-            var previousColor = Console.ForegroundColor;
-            Console.ForegroundColor = color;
-            Console.Write(message);
-            Console.ForegroundColor = previousColor;
         }
 
         private HashSet<int> GetChangedRegisters(Dictionary<int, int> regs1, Dictionary<int, int> regs2)
@@ -337,7 +258,6 @@ namespace URM_Emulator
                     changedKeys.Add(key);
                 }
             }
-
 
             return changedKeys;
         }
