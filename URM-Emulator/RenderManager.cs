@@ -2,6 +2,7 @@
 {
     public static class RenderManager
     {
+        private const string INSTRUCTION_SEPARATOR = "-------------------";
         public static void ColoredWriteLine(string message, ConsoleColor color)
         {
             ChangeConsoleColor(color, () => Console.WriteLine(message));
@@ -14,7 +15,8 @@
 
         public static void PrintExecutingInstructions(List<string> instructions, int currentInstructionIndex)
         {
-            Console.WriteLine("Program Code:\n-------------------");
+            Console.WriteLine("Program Code:");
+            Console.WriteLine(INSTRUCTION_SEPARATOR);
 
             for (int i = 0; i < instructions.Count; i++)
             {
@@ -22,7 +24,7 @@
                 var color = i == currentInstructionIndex ? ConsoleColor.Yellow : ConsoleColor.DarkYellow;
                 ColoredWriteLine($"{pointer} {i + 1}: {instructions[i]}", color);
             }
-            Console.WriteLine("\n-------------------\n");
+            Console.WriteLine(INSTRUCTION_SEPARATOR);
 
         }
         public static void PrintProgram(Dictionary<int, int> registers, List<string> instructions)
@@ -31,7 +33,7 @@
             ColoredWriteLine("Use instruction number [0] to terminate the program.", ConsoleColor.DarkYellow);
             Console.WriteLine("Current instructions:");
             PrintInstructions(instructions);
-            Console.WriteLine("--------------------");
+            Console.WriteLine(INSTRUCTION_SEPARATOR);
         }
         public static void PrintInstructions(List<string> instructions)
         {
