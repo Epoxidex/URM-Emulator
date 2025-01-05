@@ -4,19 +4,15 @@
     {
         public static void ColoredWriteLine(string message, ConsoleColor color)
         {
-            var previousColor = Console.ForegroundColor;
-            Console.ForegroundColor = color;
-            Console.WriteLine(message);
-            Console.ForegroundColor = previousColor;
+            ChangeConsoleColor(color, () => Console.WriteLine(message));
         }
+
         public static void ColoredWrite(string message, ConsoleColor color)
         {
-            var previousColor = Console.ForegroundColor;
-            Console.ForegroundColor = color;
-            Console.Write(message);
-            Console.ForegroundColor = previousColor;
+            ChangeConsoleColor(color, () => Console.Write(message));
         }
-        public static void PrintRegisters(Dictionary<int, int> registers, HashSet<int> changedRegisters = null)
+
+        public static void PrintRegisters(Dictionary<int, int> registers, HashSet<int> changedValues = null)
         {
             if (registers.Count == 0)
             {
@@ -28,56 +24,48 @@
             string separator = GenerateSeparator(columnWidth, registers.Count);
 
             Console.WriteLine(separator);
-            PrintValuesRow(registers, columnWidth, changedRegisters);
+            PrintRow(registers, columnWidth, changedValues, isKeyRow: false);
             Console.WriteLine(separator);
-            PrintKeysRow(registers, columnWidth, changedRegisters);
+            PrintRow(registers, columnWidth, changedValues, isKeyRow: true);
             Console.WriteLine(separator);
         }
 
-        private static void PrintValuesRow(Dictionary<int, int> registers, int columnWidth, HashSet<int> changedValues = null)
+        private static void PrintRow(Dictionary<int, int> registers, int columnWidth, HashSet<int> changedValues, bool isKeyRow)
         {
             Console.Write("|");
-            foreach (var value in registers.Keys.OrderBy(k => k))
-            {
-                if (changedValues != null && changedValues.Contains(value))
-                {
-                    ColoredWrite($" {registers[value].ToString().PadLeft(columnWidth)} ", ConsoleColor.Blue);
-                    Console.Write("|");
-                }
-                else
-                {
-                    Console.Write($" {registers[value].ToString().PadLeft(columnWidth)} |");
-                }
-            }
-            Console.WriteLine();
-        }
-
-        private static void PrintKeysRow(Dictionary<int, int> registers, int columnWidth, HashSet<int> changedValues = null)
-        {
-            Console.Write("|");
+            changedValues ??= new HashSet<int>();
             foreach (var key in registers.Keys.OrderBy(k => k))
             {
-                if (changedValues != null && changedValues.Contains(key))
+                string cellContent = isKeyRow ? $"R{key}".PadLeft(columnWidth) : registers[key].ToString().PadLeft(columnWidth);
+                if (changedValues.Contains(key))
                 {
-                    ColoredWrite($" {('R' + key.ToString()).PadLeft(columnWidth)} ", ConsoleColor.Blue);
-                    Console.Write("|");
+                    ColoredWrite($" {cellContent} ", ConsoleColor.Blue);
                 }
                 else
                 {
-                    Console.Write($" {('R' + key.ToString()).PadLeft(columnWidth)} |");
+                    Console.Write($" {cellContent} ");
                 }
+                Console.Write("|");
             }
             Console.WriteLine();
+        }
+
+        private static void ChangeConsoleColor(ConsoleColor color, Action action)
+        {
+            var previousColor = Console.ForegroundColor;
+            Console.ForegroundColor = color;
+            action.Invoke();
+            Console.ForegroundColor = previousColor;
         }
 
         private static string GenerateSeparator(int columnWidth, int columnCount)
         {
             return new string('-', (columnWidth + 3) * columnCount + 1);
         }
+
         private static int CalculateColumnWidth(Dictionary<int, int> registers)
         {
-            return Math.Max(registers.Values.Max(), registers.Keys.Max()).ToString().Length + 2;
+            return Math.Max(registers.Values.Max().ToString().Length, registers.Keys.Max().ToString().Length) + 2;
         }
-
     }
 }
