@@ -10,12 +10,14 @@ namespace URM_Emulator
         private readonly URM _urm;
         private readonly RegisterManager _registerManager;
         private readonly InstructionManager _instructionManager;
+        private readonly ProgramManager _programManager;
 
         public ConsoleIO(URM urm)
         {
             _urm = urm;
             _registerManager = new RegisterManager(urm);
             _instructionManager = new InstructionManager(urm);
+            _programManager = new ProgramManager(urm, _registerManager, _instructionManager);
         }
 
         public void Run()
@@ -33,9 +35,31 @@ namespace URM_Emulator
                         StepByStepExecution();
                         break;
                     case 3:
+                        RunExampleLoader();
+                        break;
+                    case 4:
                         Console.WriteLine("Exiting...");
                         return;
                 }
+            }
+        }
+        private void RunExampleLoader()
+        {
+            Console.Clear();
+            Console.WriteLine("Choose example");
+            Console.WriteLine("1. Sum of two numbers");
+
+            string input = Console.ReadLine()?.Trim().ToLower();
+            if (input.ToLower() == "x")
+                return;
+
+            switch (input)
+            {
+                case "1":
+                    _programManager.LoadProgramFromFile("Examples\\Sum of two numbers.txt");
+                    RenderManager.ColoredWriteLine("Program Loaded!", ConsoleColor.Cyan);
+                    Console.ReadKey();
+                break;
             }
         }
         private void RunProgramEditor()
@@ -167,7 +191,8 @@ namespace URM_Emulator
                 Console.WriteLine("Menu:");
                 Console.WriteLine("1. Edit program");
                 Console.WriteLine("2. Execute program");
-                Console.WriteLine("3. Exit");
+                Console.WriteLine("3. Load example of program");
+                Console.WriteLine("4. Exit");
                 Console.WriteLine();
                 Console.Write("Choose an option: ");
             }
