@@ -12,7 +12,7 @@ namespace URM_Emulator.Managers
             _urm = urm;
         }
 
-        public List<int> SetRegisterValueFromString(string registerData, char sep = ':')
+        public List<int> LoadRegisterFromString(string registerData, char sep = ':')
         {
             if (string.IsNullOrEmpty(registerData))
             {
@@ -39,7 +39,7 @@ namespace URM_Emulator.Managers
             return new List<int>([registerNumber, registerValue]);
         }
 
-        public List<List<int>> SetMultipleRegistersFromString(string input, char sep = ':')
+        public List<List<int>> LoadRegistersFromString(string input, char sep = ':')
         {
             if (string.IsNullOrEmpty(input))
             {
@@ -51,7 +51,7 @@ namespace URM_Emulator.Managers
             var result = new List<List<int>>();
             foreach (string registerData in normalizedInput.Split(' '))
             {
-                result.Add(SetRegisterValueFromString(registerData, sep: sep));
+                result.Add(LoadRegisterFromString(registerData, sep: sep));
             }
             return result;
         }
@@ -65,7 +65,7 @@ namespace URM_Emulator.Managers
             try
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                var regData = SetRegisterValueFromString(Console.ReadLine());
+                var regData = LoadRegisterFromString(Console.ReadLine());
                 return $"The register R{regData[0]} is set to a value '{regData[1]}'";
             }
             catch (Exception ex)

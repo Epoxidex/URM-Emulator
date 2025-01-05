@@ -9,6 +9,10 @@
         {
             _urm = urm;
         }
+
+        public void LoadInstructionsFromString(string instructions) => _urm.SetInstructions(instructions);
+
+        //TODO remove
         public string GetInstructionsFromFile(string path)
         {
             if (path.Trim().ToLower() == "x") return "";
