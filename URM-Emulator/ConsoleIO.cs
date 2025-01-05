@@ -127,8 +127,10 @@ namespace URM_Emulator
             while (_urm.CurrentInstructionId < _urm.Instructions.Count)
             {
                 Console.Clear();
+                Console.Write("\x1b[3J");
 
                 Console.WriteLine("Program Code:\n-------------------");
+
                 for (int i = 0; i < _urm.Instructions.Count; i++)
                 {
                     string pointer = i == _urm.CurrentInstructionId ? "->" : "  ";
