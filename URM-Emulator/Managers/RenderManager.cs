@@ -1,4 +1,4 @@
-﻿namespace URM_Emulator
+﻿namespace URM_Emulator.Managers
 {
     public static class RenderManager
     {
@@ -80,17 +80,16 @@
             Console.WriteLine();
         }
 
+        private static string GenerateSeparator(int columnWidth, int columnCount)
+        {
+            return new string('-', (columnWidth + 3) * columnCount + 1);
+        }
         private static void ChangeConsoleColor(ConsoleColor color, Action action)
         {
             var previousColor = Console.ForegroundColor;
             Console.ForegroundColor = color;
             action.Invoke();
             Console.ForegroundColor = previousColor;
-        }
-
-        private static string GenerateSeparator(int columnWidth, int columnCount)
-        {
-            return new string('-', (columnWidth + 3) * columnCount + 1);
         }
 
         private static int CalculateColumnWidth(Dictionary<int, int> registers)

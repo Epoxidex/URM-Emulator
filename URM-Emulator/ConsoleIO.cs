@@ -1,16 +1,19 @@
 ﻿using System.ComponentModel;
 using System.Drawing;
 using System.Text;
+using URM_Emulator.Managers;
 
 namespace URM_Emulator
 {
     public class ConsoleIO
     {
         private readonly URM _urm;
+        private readonly RegisterManager _registerManager;
 
         public ConsoleIO(URM urm)
         {
             _urm = urm;
+            _registerManager = new RegisterManager(urm);
         }
 
         public void Run()
@@ -33,32 +36,6 @@ namespace URM_Emulator
                 }
             }
         }
-
-        private string EnterRegisters()
-        {
-            Console.Write("\nEnter register number and value in the following format: ");
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("register_number:value");
-            Console.ForegroundColor = ConsoleColor.Gray;
-            Console.WriteLine("For example: 1:42, to set the value 42 in register R1.");
-            Console.Write(" > ");
-            try
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                var input = Console.ReadLine().Split(':').Select(s => int.Parse(s.Trim())).ToList();
-                _urm.SetRegisterValue(input[0], input[1]);
-                return $"The register R{input[0]} is set to a value '{input[1]}'";
-            }
-            catch (Exception ex)
-            {
-                return ex.Message;
-            }
-            finally
-            {
-                Console.ForegroundColor = ConsoleColor.Gray;
-            }
-        }
-
         private void RunProgramEditor()
         {
             string message = string.Empty;
@@ -86,7 +63,7 @@ namespace URM_Emulator
                 switch (input)
                 {
                     case "1":
-                        message = EnterRegisters();
+                        message = _registerManager.EnterRegisters();
                         break;
                     case "2":
                         _urm.ResetRegisters();
@@ -142,7 +119,7 @@ namespace URM_Emulator
 
                 var previousRegisters = new Dictionary<int, int>(_urm.Registers);
                 _urm.ExecuteInstruction(_urm.Instructions[_urm.CurrentInstructionId]);
-                var changedRegisters = GetChangedRegisters(previousRegisters, _urm.Registers);
+                var changedRegisters = _registerManager.GetChangedRegisters(previousRegisters, _urm.Registers);
 
                 if (changedRegisters != null)
                 {
@@ -211,31 +188,6 @@ namespace URM_Emulator
             while (!int.TryParse(Console.ReadLine(), out option));
 
             return option;
-        }
-
-        private HashSet<int> GetChangedRegisters(Dictionary<int, int> regs1, Dictionary<int, int> regs2)
-        {
-            HashSet<int> changedKeys = new HashSet<int>();
-
-            foreach (var keyValuePair in regs1)
-            {
-                int key = keyValuePair.Key;
-                if (!regs2.TryGetValue(key, out int value2) || keyValuePair.Value != value2)
-                {
-                    changedKeys.Add(key);
-                }
-            }
-
-            foreach (var keyValuePair in regs2)
-            {
-                int key = keyValuePair.Key;
-                if (!regs1.ContainsKey(key))
-                {
-                    changedKeys.Add(key);
-                }
-            }
-
-            return changedKeys;
         }
     }
 }
