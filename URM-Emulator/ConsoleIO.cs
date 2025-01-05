@@ -9,11 +9,13 @@ namespace URM_Emulator
     {
         private readonly URM _urm;
         private readonly RegisterManager _registerManager;
+        private readonly InstructionManager _instructionManager;
 
         public ConsoleIO(URM urm)
         {
             _urm = urm;
             _registerManager = new RegisterManager(urm);
+            _instructionManager = new InstructionManager(urm);
         }
 
         public void Run()
@@ -71,7 +73,7 @@ namespace URM_Emulator
                         break;
                     case "3":
                         Console.Write("Enter path to file ('x' for cancelling): ");
-                        message = GetInstructionsFromFile(Console.ReadLine());
+                        message = _instructionManager.GetInstructionsFromFile(Console.ReadLine());
                         break;
                     default:
                         message = "Invalid option. Try again.";
@@ -79,22 +81,6 @@ namespace URM_Emulator
                 }
             }
 
-        }
-
-        private string GetInstructionsFromFile(string path)
-        {
-            if (path.Trim().ToLower() == "x") return "";
-
-            string text = File.ReadAllText(path);
-            try
-            {
-                _urm.SetInstructions(text);
-                return "Instructions added.";
-            }
-            catch (Exception ex)
-            {
-                return ex.Message;
-            }
         }
 
         private void StepByStepExecution()
