@@ -12,6 +12,34 @@
             ChangeConsoleColor(color, () => Console.Write(message));
         }
 
+        public static void PrintExecutingInstructions(List<string> instructions, int currentInstructionIndex)
+        {
+            Console.WriteLine("Program Code:\n-------------------");
+
+            for (int i = 0; i < instructions.Count; i++)
+            {
+                string pointer = i == currentInstructionIndex ? "->" : "  ";
+                var color = i == currentInstructionIndex ? ConsoleColor.Yellow : ConsoleColor.DarkYellow;
+                ColoredWriteLine($"{pointer} {i + 1}: {instructions[i]}", color);
+            }
+            Console.WriteLine("\n-------------------\n");
+
+        }
+        public static void PrintProgram(Dictionary<int, int> registers, List<string> instructions)
+        {
+            PrintRegisters(registers);
+            ColoredWriteLine("Use instruction number [0] to terminate the program.", ConsoleColor.DarkYellow);
+            Console.WriteLine("Current instructions:");
+            PrintInstructions(instructions);
+            Console.WriteLine("--------------------");
+        }
+        public static void PrintInstructions(List<string> instructions)
+        {
+            for (int i = 0; i < instructions.Count; i++)
+            {
+                Console.WriteLine($"[{i + 1}] {instructions[i]}");
+            }
+        }
         public static void PrintRegisters(Dictionary<int, int> registers, HashSet<int> changedValues = null)
         {
             if (registers.Count == 0)

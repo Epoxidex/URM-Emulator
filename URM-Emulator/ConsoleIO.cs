@@ -67,7 +67,7 @@ namespace URM_Emulator
             {
 
                 Console.Clear();
-                PrintProgram();
+                RenderManager.PrintProgram(_urm.Registers, _urm.Instructions);
 
                 RenderManager.ColoredWriteLine(message, ConsoleColor.Cyan);
                 Console.WriteLine();
@@ -129,16 +129,7 @@ namespace URM_Emulator
                 Console.Clear();
                 Console.Write("\x1b[3J");
 
-                Console.WriteLine("Program Code:\n-------------------");
-
-                for (int i = 0; i < _urm.Instructions.Count; i++)
-                {
-                    string pointer = i == _urm.CurrentInstructionId ? "->" : "  ";
-                    var color = i == _urm.CurrentInstructionId ? ConsoleColor.Yellow : ConsoleColor.DarkYellow;
-                    RenderManager.ColoredWriteLine($"{pointer} {i + 1}: {_urm.Instructions[i]}", color);
-                    Console.ForegroundColor = ConsoleColor.Gray;
-                }
-                Console.WriteLine("\n-------------------\n");
+                RenderManager.PrintExecutingInstructions(_urm.Instructions, _urm.CurrentInstructionId);
 
                 if (_urm.CurrentInstructionId >= _urm.Instructions.Count || _urm.CurrentInstructionId < 0)
                 {
@@ -220,23 +211,6 @@ namespace URM_Emulator
             while (!int.TryParse(Console.ReadLine(), out option));
 
             return option;
-        }
-
-        private void PrintProgram()
-        {
-            RenderManager.PrintRegisters(_urm.Registers);
-            RenderManager.ColoredWriteLine("Use instruction number [0] to terminate the program.", ConsoleColor.DarkYellow);
-            Console.WriteLine("Current instructions:");
-            PrintInstructions();
-            Console.WriteLine("--------------------");
-        }
-        private void PrintInstructions()
-        {
-            var instructions = _urm.Instructions;
-            for (int i = 0; i < _urm.Instructions.Count; i++)
-            {
-                Console.WriteLine($"[{i + 1}] {instructions[i]}");
-            }
         }
 
         private HashSet<int> GetChangedRegisters(Dictionary<int, int> regs1, Dictionary<int, int> regs2)
