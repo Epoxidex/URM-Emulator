@@ -1,142 +1,170 @@
-﻿using System;
-
-namespace URM_Emulator
+﻿namespace URM_Emulator
 {
+    /// <summary>
+    /// Represents a Unlimited Register Machine (URM).
+    /// </summary>
     public class URM
     {
-        private const int TERMINATION_INSTRUCTION_ID = -1;
-        private const int STARTING_NUMBER_OF_REGISTERS = 3;
-        public Dictionary<int, int> Registers { get; private set; } = new Dictionary<int, int>();
-        public List<string> Instructions { get; private set; } = new List<string>();
+        private const int TerminationInstructionId = -1;
+        private const int DefaultRegisterCount = 3;
 
-        public int CurrentInstructionId { get; private set; } = 0;
+        public Dictionary<int, int> Registers { get; private set; }
+        public List<string> Instructions { get; private set; }
+        public int CurrentInstructionId { get; private set; }
 
         public URM()
         {
-            FillStartRegisters();
+            Registers = new Dictionary<int, int>();
+            Instructions = new List<string>();
+            ResetRegisters();
+            GoToFirstInstruction();
         }
 
-        public void DeleteAllInstructions()
-        {
-            Instructions = new List<string>();
-        }
+        /// <summary>
+        /// Clears all loaded instructions.
+        /// </summary>
+        public void DeleteAllInstructions() => Instructions.Clear();
+
+        /// <summary>
+        /// Resets all registers to default values.
+        /// </summary>
         public void ResetRegisters()
         {
             Registers.Clear();
-            FillStartRegisters();
+            for (int i = 1; i <= DefaultRegisterCount; i++)
+            {
+                Registers[i] = 0;
+            }
         }
 
-        private void FillStartRegisters()
-        {
-            for (int i = 1; i <= STARTING_NUMBER_OF_REGISTERS; i++)
-                Registers[i] = 0;
-        }
+        /// <summary>
+        /// Gets the value of a specific register.
+        /// </summary>
         public int GetRegisterValue(int index)
         {
-            if (!Registers.ContainsKey(index)) 
-                return 0;
-            return Registers[index];
+            if (index < 1) throw new ArgumentOutOfRangeException(nameof(index), "Register number must be greater than 0.");
+            return Registers.TryGetValue(index, out int value) ? value : 0;
         }
 
+        /// <summary>
+        /// Sets the value of a specific register.
+        /// </summary>
         public void SetRegisterValue(int index, int value)
         {
-            if (index < 1)
-                throw new Exception("The register number is less than 1");
-            if (value < 0)
-                throw new Exception("The register value is less than 0");
-            else 
-                Registers[index] = value;
+            if (index < 1) throw new ArgumentOutOfRangeException(nameof(index), "Register number must be greater than 0.");
+            if (value < 0) throw new ArgumentOutOfRangeException(nameof(value), "Register value must be non-negative.");
+
+            Registers[index] = value;
         }
 
+        /// <summary>
+        /// Sets multiple register values at once.
+        /// </summary>
         public void SetRegistersValues(Dictionary<int, int> values)
         {
-            if (values.Keys.Any(x => x < 1) || values.Values.Any(x => x < 0))
-                throw new Exception("Found invalid register number or value");
-            Registers = values;
+            if (values.Keys.Any(key => key < 1)) throw new ArgumentException("All register numbers must be greater than 0.");
+            if (values.Values.Any(value => value < 0)) throw new ArgumentException("All register values must be non-negative.");
+
+            foreach (var pair in values)
+            {
+                Registers[pair.Key] = pair.Value;
+            }
         }
 
+        /// <summary>
+        /// Loads and validates instructions.
+        /// </summary>
         public void SetInstructions(string instructions)
         {
+            if (string.IsNullOrWhiteSpace(instructions)) throw new ArgumentException("Instructions cannot be null or empty.");
             Instructions = InstructionHelper.ValidateInstructions(instructions);
         }
-        public void GoToNextInstuction()
-        {
-            CurrentInstructionId++;
-        }
 
-        public void GoToFirstInstruction()
-        {
-            CurrentInstructionId = 0;
-        }
+        /// <summary>
+        /// Moves to the next instruction.
+        /// </summary>
+        public void GoToNextInstruction() => CurrentInstructionId++;
 
+        /// <summary>
+        /// Resets instruction pointer to the first instruction.
+        /// </summary>
+        public void GoToFirstInstruction() => CurrentInstructionId = 0;
+
+        /// <summary>
+        /// Executes all loaded instructions.
+        /// </summary>
         public void ExecuteInstructions()
         {
-            while (CurrentInstructionId != TERMINATION_INSTRUCTION_ID && CurrentInstructionId < Instructions.Count)
+            while (CurrentInstructionId != TerminationInstructionId && CurrentInstructionId < Instructions.Count)
             {
                 ExecuteInstruction(Instructions[CurrentInstructionId]);
             }
             GoToFirstInstruction();
         }
+
+        /// <summary>
+        /// Executes a single instruction.
+        /// </summary>
         public void ExecuteInstruction(string instruction)
         {
-            var terms = instruction.Split(' ');
+            var terms = instruction.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
             switch (terms[0].ToUpper())
             {
-                case "Z": 
-                    Z(int.Parse(terms[1]));
-                    GoToNextInstuction();
+                case "Z":
+                    Z(ParseRegister(terms[1]));
+                    GoToNextInstruction();
                     break;
 
-                case "S": 
-                    S(int.Parse(terms[1]));
-                    GoToNextInstuction();
+                case "S":
+                    S(ParseRegister(terms[1]));
+                    GoToNextInstruction();
                     break;
 
-                case "M": 
-                    M(int.Parse(terms[1]), int.Parse(terms[2]));
-                    GoToNextInstuction();
+                case "M":
+                    M(ParseRegister(terms[1]), ParseRegister(terms[2]));
+                    GoToNextInstruction();
                     break;
 
                 case "J":
-                    J(int.Parse(terms[1]), int.Parse(terms[2]), int.Parse(terms[3]));
+                    J(ParseRegister(terms[1]), ParseRegister(terms[2]), ParseInstructionId(terms[3]));
                     break;
+
+                default:
+                    throw new InvalidOperationException($"Unknown instruction: {terms[0]}");
             }
         }
-        public void Z(int index)
+
+        private int ParseRegister(string input)
         {
-            Registers[index] = 0;
+            if (!int.TryParse(input, out int index) || index < 1)
+                throw new FormatException($"Invalid register number: {input}");
+            return index;
         }
 
-        public void S(int index)
+        private int ParseInstructionId(string input)
         {
-            if (!Registers.ContainsKey(index))
-                Registers[index] = 1;
+            if (!int.TryParse(input, out int id) || id < 0)
+                throw new FormatException($"Invalid instruction ID: {input}");
+            return id;
+        }
+
+        private void Z(int index) => Registers[index] = 0;
+
+        private void S(int index) => Registers[index] = Registers.GetValueOrDefault(index, 0) + 1;
+
+        private void M(int fromIndex, int toIndex) => Registers[toIndex] = Registers.GetValueOrDefault(fromIndex, 0);
+
+        private void J(int index1, int index2, int instructionId)
+        {
+            if (Registers.GetValueOrDefault(index1) == Registers.GetValueOrDefault(index2))
+            {
+                CurrentInstructionId = instructionId - 1;
+            }
             else
-                Registers[index]++;
-        }
-
-        public void M(int fromIndex, int toIndex)
-        {
-            if (!Registers.ContainsKey(fromIndex))
-                Registers[fromIndex] = 0;
-            if (!Registers.ContainsKey(toIndex))
-                Registers[toIndex] = 0;
-            
-            Registers[toIndex] = Registers[fromIndex];
-        }
-
-        public void J(int index1, int index2, int instructionId)
-        {
-            if (!Registers.ContainsKey(index1))
-                Registers[index1] = 0;
-            if (!Registers.ContainsKey(index2))
-                Registers[index2] = 0;
-
-            if (Registers[index1] == Registers[index2])
-                CurrentInstructionId = instructionId-1;
-            else
-                GoToNextInstuction();
+            {
+                GoToNextInstruction();
+            }
         }
     }
 }
