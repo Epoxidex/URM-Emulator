@@ -2,58 +2,56 @@
 {
     public static class InstructionHelper
     {
-
+        /// <summary>
+        /// Validates a single URM instruction.
+        /// </summary>
+        /// <param name="instruction">The instruction to validate.</param>
+        /// <returns>The validated instruction in uppercase.</returns>
         public static string ValidateInstruction(string instruction)
         {
-            instruction = instruction.Trim().ToUpper();
-            var args = instruction.Split(' ').Skip(1);
+            if (string.IsNullOrWhiteSpace(instruction))
+                throw new ArgumentException("Instruction cannot be null or empty.");
 
-            while (instruction.Contains("  "))
-                instruction = instruction.Replace("  ", " ");
+            // Normalize instruction format
+            instruction = string.Join(" ", instruction.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries)).ToUpper();
+            var parts = instruction.Split(' ');
+            var command = parts[0];
+            var args = parts.Skip(1).ToArray();
 
-            switch (instruction[0])
+            // Validate command and argument count
+            int expectedArgs = command switch
             {
-                case 'Z':
-                    if (args.Count() != 1) throw new Exception("Invalid number of arguments for Z");
-                    break;
+                "Z" => 1,
+                "S" => 1,
+                "M" => 2,
+                "J" => 3,
+                _ => throw new FormatException($"Unknown instruction: {command}")
+            };
 
-                case 'S':
-                    if (args.Count() != 1) throw new Exception("Invalid number of arguments for S");
-                    break;
+            if (args.Length != expectedArgs)
+                throw new FormatException($"Instruction {command} expects {expectedArgs} arguments, but got {args.Length}.");
 
-                case 'M':
-                    if (args.Count() != 2) throw new Exception("Invalid number of arguments for M");
-                    break;
-
-                case 'J':
-                    if (args.Count() != 3) throw new Exception("Invalid number of arguments for J");
-                    break;
-
-                default:
-                    throw new Exception("Unknown instruction");
-            }
-
-            try
-            {
-                var intArgs = args.Select(x => int.Parse(x));
-                if (intArgs.Any(x => x < 0)) 
-                    throw new Exception("Invalid arguments");
-            }
-            catch
-            {
-                throw new Exception("Invalid arguments");
-            }
+            // Validate arguments as non-negative integers
+            if (!args.All(arg => int.TryParse(arg, out int value) && value >= 0))
+                throw new FormatException($"Instruction {command} contains invalid or negative arguments.");
 
             return instruction;
         }
 
+        /// <summary>
+        /// Validates a series of URM instructions.
+        /// </summary>
+        /// <param name="instructions">The multiline string containing instructions.</param>
+        /// <returns>A list of validated instructions.</returns>
         public static List<string> ValidateInstructions(string instructions)
         {
-            instructions = instructions.Trim();
-            while (instructions.Contains("\n\n"))
-                instructions = instructions.Replace("\n\n", "\n");
+            if (string.IsNullOrWhiteSpace(instructions))
+                throw new ArgumentException("Instructions cannot be null or empty.");
 
-            return instructions.Split("\n").Select(x => ValidateInstruction(x)).ToList();
+            return instructions
+                .Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(ValidateInstruction)
+                .ToList();
         }
     }
 }
