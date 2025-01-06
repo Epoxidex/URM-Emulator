@@ -45,28 +45,50 @@ namespace URM_Emulator
         }
         private void RunExampleLoader()
         {
-            Console.Clear();
-            Console.WriteLine("Choose example");
-            Console.WriteLine("1. Sum of two numbers | R1+R2");
-            Console.WriteLine("2. Maximum of three numbers | max(R1, R2, R3)");
-
-            string input = Console.ReadLine()?.Trim().ToLower();
-            if (input.ToLower() == "x")
-                return;
-
-            switch (input)
+            string message = string.Empty;
+            while (true)
             {
-                case "1":
-                    _programManager.LoadProgramFromFile("Examples\\Sum of two numbers.txt");
-                    RenderManager.ColoredWriteLine("Program Loaded!", ConsoleColor.Cyan);
-                    Console.ReadKey();
-                break;
-                case "2":
-                    _programManager.LoadProgramFromFile("Examples\\Maximum of three numbers.txt");
+                Console.Clear();
+                Console.WriteLine("Choose example (type 'x' to exit):");
+                Console.WriteLine("1. Sum of two numbers | R1+R2");
+                Console.WriteLine("2. Maximum of three numbers | max(R1, R2, R3)");
+                RenderManager.ColoredWriteLine(message, ConsoleColor.Cyan);
+
+                string input = Console.ReadLine()?.Trim().ToLower();
+
+                if (input == "x")
                     break;
+
+                switch (input)
+                {
+                    case "1":
+                        LoadExample("Examples\\Sum of two numbers.txt");
+                        break;
+                    case "2":
+                        LoadExample("Examples\\Maximum of three numbers.txt");
+                        break;
+                    default:
+                        message = "Invalid option. Please try again.";
+                        continue;
+                }
+
+                RenderManager.ColoredWriteLine("Program Loaded!", ConsoleColor.Cyan);
+                Console.ReadKey();
+                break;
             }
-            RenderManager.ColoredWriteLine("Program Loaded!", ConsoleColor.Cyan);
-            Console.ReadKey();
+        }
+
+        private void LoadExample(string filePath)
+        {
+            try
+            {
+                _programManager.LoadProgramFromFile(filePath);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading file: {ex.Message}");
+                Console.ReadKey();
+            }
         }
         private void RunProgramEditor()
         {
