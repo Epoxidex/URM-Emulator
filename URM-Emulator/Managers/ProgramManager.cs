@@ -29,7 +29,7 @@
             }
             else
             {
-                throw new FormatException("Ivalid data format");
+                throw new FormatException("Invalid data format");
             }
         }
     }
