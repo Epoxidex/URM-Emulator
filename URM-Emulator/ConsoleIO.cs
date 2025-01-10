@@ -1,6 +1,5 @@
-﻿using System.ComponentModel;
-using System.Drawing;
-using System.Text;
+﻿using URM_Emulator.ConsoleGraphics;
+using URM_Emulator.ConsoleGraphics.Forms;
 using URM_Emulator.Managers;
 
 namespace URM_Emulator
@@ -18,133 +17,145 @@ namespace URM_Emulator
             _registerManager = new RegisterManager(urm);
             _instructionManager = new InstructionManager(urm);
             _programManager = new ProgramManager(urm, _registerManager, _instructionManager);
+
+            Console.CursorVisible = false;
         }
 
         public void Run()
         {
             while (true)
             {
-                int option = ShowMenu();
-
+                Console.Clear();
+                int option = ShowMainMenu();
+                Console.Clear();
                 switch (option)
                 {
-                    case 1:
+                    case 0:
                         RunProgramEditor();
                         break;
-                    case 2:
+                    case 1:
                         StepByStepExecution();
                         break;
-                    case 3:
+                    case 2:
                         RunExampleLoader();
                         break;
-                    case 4:
-                        Console.WriteLine("Exiting...");
+                    case 3:
                         return;
                 }
             }
         }
-        private void RunExampleLoader()
+
+        private int ShowMainMenu()
         {
-            string message = string.Empty;
-            while (true)
+            string[] menuItems =
             {
-                Console.Clear();
-                Console.WriteLine("Choose example (type 'x' to exit):");
-                Console.WriteLine("1. Sum of two numbers | R1+R2");
-                Console.WriteLine("2. Maximum of three numbers | max(R1, R2, R3)");
-                RenderManager.ColoredWriteLine(message, ConsoleColor.Cyan);
+                " Edit program ",
+                " Execute program ",
+                " Load example of program ",
+                " Exit "
+            };
 
-                string input = Console.ReadLine()?.Trim().ToLower();
-
-                if (input == "x")
-                    break;
-
-                switch (input)
-                {
-                    case "1":
-                        LoadExample("Examples\\Sum of two numbers.txt");
-                        break;
-                    case "2":
-                        LoadExample("Examples\\Maximum of three numbers.txt");
-                        break;
-                    default:
-                        message = "Invalid option. Please try again.";
-                        continue;
-                }
-
-                RenderManager.ColoredWriteLine("Program Loaded!", ConsoleColor.Cyan);
-                Console.ReadKey();
-                break;
-            }
+            return SelectMenuOption(menuItems, new MenuForm(2, 2, "Choose option", menuItems, border: true, ConsoleColor.Green));
         }
 
-        private void LoadExample(string filePath)
+        private int SelectMenuOption(string[] options, MenuForm menuForm)
         {
+            int selectedIndex = 0;
+            ConsoleKey key;
+
+            do
+            {
+                menuForm.Show();
+                key = Console.ReadKey().Key;
+
+                if (key == ConsoleKey.UpArrow)
+                    selectedIndex = (selectedIndex - 1 + options.Length) % options.Length;
+                else if (key == ConsoleKey.DownArrow)
+                    selectedIndex = (selectedIndex + 1) % options.Length;
+
+                menuForm.SelectedIndex = selectedIndex;
+
+            } while (key != ConsoleKey.Enter);
+
+            return selectedIndex;
+        }
+
+        private void RunExampleLoader()
+        {
+            string[] examples =
+            {
+                "Sum of two numbers | R1+R2",
+                "Maximum of three numbers | max(R1, R2, R3)"
+            };
+
+            int selectedIndex = SelectMenuOption(examples, new MenuForm(2, 2, "Examples", examples, true, ConsoleColor.Cyan));
+
             try
             {
+                string filePath = selectedIndex switch
+                {
+                    0 => "Examples\\Sum of two numbers.txt",
+                    1 => "Examples\\Maximum of three numbers.txt",
+                    _ => throw new InvalidOperationException()
+                };
+
                 _programManager.LoadProgramFromFile(filePath);
+                ShowMessage("Program Loaded!", ConsoleColor.Green);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error loading file: {ex.Message}");
-                Console.ReadKey();
+                ShowMessage($"Error loading file: {ex.Message}", ConsoleColor.Red);
             }
         }
+
         private void RunProgramEditor()
         {
-            string message = string.Empty;
+            string[] editorOptions =
+            {
+                " Set register value ",
+                " Reset all registers ",
+                " Choose instructions from file ",
+                " Back "
+            };
 
             while (true)
             {
+                RenderCurrentState();
+                int selectedIndex = SelectMenuOption(editorOptions, new MenuForm(2, 2, "Choouse option", editorOptions, true, ConsoleColor.Green));
 
-                Console.Clear();
-                RenderManager.PrintProgram(_urm.Registers, _urm.Instructions);
-
-                RenderManager.ColoredWriteLine(message, ConsoleColor.Cyan);
-                Console.WriteLine();
-
-                Console.WriteLine("Options:");
-                Console.WriteLine("1. Set register value");
-                Console.WriteLine("2. Reset all registers");
-                Console.WriteLine("3. Choose instructions from file");
-                Console.WriteLine("'x' to return to main menu");
-                Console.WriteLine();
-                Console.Write("Choose an option: ");
-
-                string input = Console.ReadLine()?.Trim().ToLower();
-                if (input.ToLower() == "x") break;
-
-                switch (input)
+                switch (selectedIndex)
                 {
-                    case "1":
-                        message = _registerManager.EnterRegisters();
+                    case 0:
+                        ShowMessage(_registerManager.EnterRegisters(), ConsoleColor.Green);
                         break;
-                    case "2":
+                    case 1:
                         _urm.ResetRegisters();
-                        message = "Registers reset.";
+                        ShowMessage("Registers reset.", ConsoleColor.Green);
                         break;
-                    case "3":
-                        Console.Write("Enter path to file ('x' for cancelling): ");
-                        message = _instructionManager.GetInstructionsFromFile(Console.ReadLine());
+                    case 2:
+                        ShowMessage("Feature not implemented yet.", ConsoleColor.Yellow);
                         break;
-                    default:
-                        message = "Invalid option. Try again.";
-                        break;
+                    case 3:
+                        return;
                 }
             }
-
         }
 
         private void StepByStepExecution()
         {
             var oldRegisters = new Dictionary<int, int>(_urm.Registers);
 
+            var oldRegistersForm = new RegistersForm(30, 2, "Registers", _urm.Registers);
+            var newRegistersForm = new RegistersForm(30, 8, "Registers", _urm.Registers);
+
+            var k = 1;
+            var instructionsForm = new InstructionsForm(2, 2, "Instructions", _urm.Instructions.Select(i => $" [{k++}] {i.ToString()} ").ToArray());
+            instructionsForm.CurrentInstructionIndex = 0;
+
             while (_urm.CurrentInstructionId < _urm.Instructions.Count)
             {
                 Console.Clear();
                 Console.Write("\x1b[3J");
-
-                RenderManager.PrintExecutingInstructions(_urm.Instructions, _urm.CurrentInstructionId);
 
                 if (_urm.CurrentInstructionId >= _urm.Instructions.Count || _urm.CurrentInstructionId < 0)
                 {
@@ -152,31 +163,32 @@ namespace URM_Emulator
                     break;
                 }
 
-                Console.Write($"Current Instruction (#{_urm.CurrentInstructionId + 1}): ");
-                RenderManager.ColoredWriteLine($"{_urm.Instructions[_urm.CurrentInstructionId]}", ConsoleColor.Yellow);
+                instructionsForm.Show();
+
+                //Console.Write($"Current Instruction (#{_urm.CurrentInstructionId + 1}): ");
+                //RenderManager.ColoredWriteLine($"{_urm.Instructions[_urm.CurrentInstructionId]}", ConsoleColor.Yellow);
 
                 var previousRegisters = new Dictionary<int, int>(_urm.Registers);
                 _urm.ExecuteInstruction(_urm.Instructions[_urm.CurrentInstructionId]);
                 var changedRegisters = _registerManager.GetChangedRegisters(previousRegisters, _urm.Registers);
 
-                if (changedRegisters != null)
-                {
-                    Console.WriteLine("Changed registers: ");
-                    foreach (var reg in changedRegisters)
-                    {
-                        RenderManager.ColoredWriteLine($"R{reg}: {(previousRegisters.ContainsKey(reg) ? previousRegisters[reg] : 0)} -> {_urm.Registers[reg]}", ConsoleColor.Blue);
-                    }
-                }
-                Console.WriteLine();
+                //if (changedRegisters != null)
+                //{
+                //    Console.WriteLine("Changed registers: ");
+                //    foreach (var reg in changedRegisters)
+                //    {
+                //        RenderManager.ColoredWriteLine($"R{reg}: {(previousRegisters.ContainsKey(reg) ? previousRegisters[reg] : 0)} -> {_urm.Registers[reg]}", ConsoleColor.Blue);
+                //    }
+                //}
+                //Console.WriteLine();
 
-                Console.WriteLine("Registers before execution:");
+                oldRegistersForm.Registers = previousRegisters;
+                oldRegistersForm.ChangedValues = changedRegisters;
+                oldRegistersForm.Show();
+                newRegistersForm.ChangedValues = changedRegisters;
+                newRegistersForm.Show();
 
-                RenderManager.PrintRegisters(previousRegisters, changedRegisters);
-
-                Console.WriteLine("\nRegisters after execution:");
-                RenderManager.PrintRegisters(_urm.Registers, changedRegisters);
-
-                Console.WriteLine("\nPress 'Enter' to continue, 'q' to quit step-by-step mode and complete program.");
+                //Console.WriteLine("\nPress 'Enter' to continue, 'q' to quit step-by-step mode and complete program.");
                 var key = Console.ReadKey();
 
                 if (key.Key == ConsoleKey.Q)
@@ -184,49 +196,46 @@ namespace URM_Emulator
                     _urm.ExecuteInstructions();
                     break;
                 }
+                instructionsForm.CurrentInstructionIndex = _urm.CurrentInstructionId;
             }
 
             _urm.GoToFirstInstruction();
 
-            Console.Clear();
-            Console.WriteLine("Program completed");
-            Console.WriteLine("Old registers:");
-            RenderManager.PrintRegisters(oldRegisters);
-            Console.WriteLine("New registers:");
-            RenderManager.PrintRegisters(_urm.Registers);
+            //Console.Clear();
+            //Console.WriteLine("Program completed");
+            //Console.WriteLine("Old registers:");
+            //RenderManager.PrintRegisters(oldRegisters);
+            //Console.WriteLine("New registers:");
+            //RenderManager.PrintRegisters(_urm.Registers);
 
-            string input;
-            do
-            {
-                Console.WriteLine("\nSave new register values? [y/n]");
-                input = Console.ReadLine().Trim().ToLower();
-            } while (input != "y" && input != "n");
+            //string input;
+            //do
+            //{
+            //    Console.WriteLine("\nSave new register values? [y/n]");
+            //    input = Console.ReadLine().Trim().ToLower();
+            //} while (input != "y" && input != "n");
 
 
-            if (input == "n")
-                _urm.SetRegistersValues(oldRegisters);
+            //if (input == "n")
+            //    _urm.SetRegistersValues(oldRegisters);
         }
 
-
-
-        private int ShowMenu()
+        private void RenderCurrentState()
         {
-            int option;
+            var registersForm = new RegistersForm(2, 8, "Registers", _urm.Registers);
+            registersForm.Show();
 
-            do
-            {
-                Console.Clear();
-                Console.WriteLine("Menu:");
-                Console.WriteLine("1. Edit program");
-                Console.WriteLine("2. Execute program");
-                Console.WriteLine("3. Load example of program");
-                Console.WriteLine("4. Exit");
-                Console.WriteLine();
-                Console.Write("Choose an option: ");
-            }
-            while (!int.TryParse(Console.ReadLine(), out option));
+            var k = 1;
+            var instructionsForm = new InstructionsForm(2, 13, "Instructions", _urm.Instructions.Select(i => $" [{k++}] {i.ToString()} ").ToArray());
+            instructionsForm.Show();
+        }
 
-            return option;
+        private void ShowMessage(string message, ConsoleColor color)
+        {
+            Console.Clear();
+            var resultForm = new Form(2, 2, "Message", new[] { message }, true, color);
+            resultForm.Show();
+            Console.ReadKey();
         }
     }
 }

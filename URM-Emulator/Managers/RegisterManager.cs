@@ -59,7 +59,7 @@ namespace URM_Emulator.Managers
         public string EnterRegisters()
         {
             Console.Write("\nEnter register number and value in the following format: ");
-            RenderManager.ColoredWriteLine("register_number:value", ConsoleColor.Yellow);
+            Console.WriteLine("register_number:value");
             Console.WriteLine("For example: 1:42, to set the value 42 in register R1.");
             Console.Write(" > ");
             try
