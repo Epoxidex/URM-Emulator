@@ -26,8 +26,12 @@
 
             for (int i = 0; i < rows.Length; i++)
             {
-                Console.SetCursorPosition(X + 1, Y + 1 + i);
+                Console.SetCursorPosition(X + 1, Y + 2 + i);
                 Console.Write(rows[i]);
+            }
+            if (PrintTitle)
+            {
+                Graphics.PrintTitle(Title, X + 2, Y);
             }
         }
 

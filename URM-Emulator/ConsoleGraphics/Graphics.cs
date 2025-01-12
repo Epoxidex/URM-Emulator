@@ -6,7 +6,7 @@ namespace URM_Emulator.ConsoleGraphics
         public static void DrawBorder(int x, int y, string[] rows, string title)
         {
             int width = GetMaxWidth(rows, title) + 4;
-            int height = rows.Length + 2;
+            int height = rows.Length + 3;
 
             Console.SetCursorPosition(x, y);
             Console.Write("╔" + new string('═', width - 2) + "╗");
@@ -19,14 +19,15 @@ namespace URM_Emulator.ConsoleGraphics
 
             Console.SetCursorPosition(x, y + height - 1);
             Console.Write("╚" + new string('═', width - 2) + "╝");
-
-            PrintTitle(title, x+2, y);
-
         }
-        private static void PrintTitle(string title, int x, int y)
+        public static void PrintTitle(string title, int x, int y)
         {
+            Console.SetCursorPosition(x, y-1);
+            Console.Write("╔" + new string('═', title.Length) + "╗");
             Console.SetCursorPosition(x, y);
             Console.Write($"╣{title}╠");
+            Console.SetCursorPosition(x, y + 1);
+            Console.Write("╚" + new string('═', title.Length) + "╝");
         }
         private static int GetMaxWidth(string[] rows, string title)
         {

@@ -199,11 +199,11 @@ namespace URM_Emulator
 
         private void RenderCurrentState()
         {
-            var registersForm = new RegistersForm(2, 10, "Registers", _urm.Registers);
+            var registersForm = new RegistersForm(2, 12, "Registers", _urm.Registers);
             registersForm.Show();
 
             var k = 1;
-            var instructionsForm = new InstructionsForm(2, 15, "Instructions", _urm.Instructions.Select(i => $" [{k++}] {i.ToString()} ").ToArray());
+            var instructionsForm = new InstructionsForm(2, 19, "Instructions", _urm.Instructions.Select(i => $" [{k++}] {i.ToString()} ").ToArray());
             instructionsForm.Show();
         }
 

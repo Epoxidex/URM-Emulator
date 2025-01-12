@@ -23,7 +23,7 @@
 
             for (int i = 0; i < Rows.Length; i++)
             {
-                Console.SetCursorPosition(X + 1, Y + 1 + i);
+                Console.SetCursorPosition(X + 1, Y + 2 + i);
 
                 if (i == SelectedIndex)
                 {
@@ -36,6 +36,10 @@
                 // Reset color
                 Console.ResetColor();
                 Console.ForegroundColor = Color;
+            }
+            if (PrintTitle)
+            {
+                Graphics.PrintTitle(Title, X + 2, Y);
             }
         }
     }
