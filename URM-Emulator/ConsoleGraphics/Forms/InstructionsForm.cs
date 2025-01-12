@@ -4,11 +4,12 @@ namespace URM_Emulator.ConsoleGraphics.Forms
     public class InstructionsForm : Form
     {
         public int CurrentInstructionIndex { get; set; } = -1;
+        public int MaxRowLength { get; private set; }
 
         public InstructionsForm(int x, int y, string title, string[] instructions, ConsoleColor color = ConsoleColor.Yellow)
             : base(x, y, title, instructions, true, color)
         {
-
+            MaxRowLength = instructions.Max(x => x.Length);
         }
 
         public void Show()
@@ -33,7 +34,7 @@ namespace URM_Emulator.ConsoleGraphics.Forms
                     Console.BackgroundColor = Color;
                     Console.ForegroundColor = ConsoleColor.Black;
                 }
-                Console.Write(Rows[i]);
+                Console.Write(Rows[i].PadRight(MaxRowLength + 2));
 
                 Console.ResetColor();
                 Console.ForegroundColor = Color;

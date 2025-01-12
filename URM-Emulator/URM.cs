@@ -6,7 +6,7 @@
     public class URM
     {
         private const int TerminationInstructionId = -1;
-        private const int DefaultRegisterCount = 3;
+        private const int DefaultRegisterCount = 10;
 
         public Dictionary<int, int> Registers { get; private set; }
         public List<string> Instructions { get; private set; }
