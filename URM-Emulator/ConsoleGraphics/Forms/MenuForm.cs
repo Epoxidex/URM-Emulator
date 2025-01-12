@@ -3,12 +3,13 @@
     public class MenuForm : Form
     {
         public int SelectedIndex { get; set; } = 0;
-        public int MaxRowLength  { get; private set; }
+        public int MaxRowLength { get; private set; } = 0;
 
         public MenuForm(int x, int y, string title, string[] rows, bool border, ConsoleColor color = ConsoleColor.White)
             : base(x, y, title, rows, border, color)
         {
-            MaxRowLength = rows.Max(x => x.Length);
+            if (rows.Count() > 0)
+                MaxRowLength = rows.Max(x => x.Length);
         }
 
         public void Show()

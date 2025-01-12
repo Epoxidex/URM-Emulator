@@ -4,12 +4,13 @@ namespace URM_Emulator.ConsoleGraphics.Forms
     public class InstructionsForm : Form
     {
         public int CurrentInstructionIndex { get; set; } = -1;
-        public int MaxRowLength { get; private set; }
+        public int MaxRowLength { get; private set; } = 0;
 
         public InstructionsForm(int x, int y, string title, string[] instructions, ConsoleColor color = ConsoleColor.Yellow)
             : base(x, y, title, instructions, true, color)
         {
-            MaxRowLength = instructions.Max(x => x.Length);
+            if (instructions.Count() > 0)
+                MaxRowLength = instructions.Max(x => x.Length);
         }
 
         public void Show()
