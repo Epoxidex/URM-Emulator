@@ -1,4 +1,5 @@
-﻿using URM_Emulator.ConsoleGraphics;
+﻿using System.Data;
+using URM_Emulator.ConsoleGraphics;
 using URM_Emulator.ConsoleGraphics.Forms;
 using URM_Emulator.Managers;
 
@@ -23,23 +24,32 @@ namespace URM_Emulator
 
         public void Run()
         {
+            Form lastMessageForm = null;
             while (true)
             {
                 Console.Clear();
+                RenderCurrentState();
+                lastMessageForm?.Show();
                 int option = ShowMainMenu();
-                Console.Clear();
                 switch (option)
                 {
                     case 0:
-                        RunProgramEditor();
+                        lastMessageForm = GetMessage(_registerManager.EnterRegisters(), ConsoleColor.Green);
                         break;
                     case 1:
-                        StepByStepExecution();
+                        _urm.ResetRegisters();
+                        lastMessageForm = GetMessage("Registers reset.", ConsoleColor.Green);
                         break;
                     case 2:
-                        RunExampleLoader();
+                        lastMessageForm = GetMessage("Feature not implemented yet.", ConsoleColor.Yellow);
                         break;
                     case 3:
+                        StepByStepExecution();
+                        break;
+                    case 4:
+                        lastMessageForm = RunExampleLoader();
+                        break;
+                    case 5:
                         return;
                 }
             }
@@ -49,7 +59,9 @@ namespace URM_Emulator
         {
             string[] menuItems =
             {
-                " Edit program ",
+                " Set register value ",
+                " Reset all registers ",
+                " Choose instructions from file ",
                 " Execute program ",
                 " Load example of program ",
                 " Exit "
@@ -80,7 +92,7 @@ namespace URM_Emulator
             return selectedIndex;
         }
 
-        private void RunExampleLoader()
+        private Form RunExampleLoader()
         {
             string[] examples =
             {
@@ -88,7 +100,7 @@ namespace URM_Emulator
                 "Maximum of three numbers | max(R1, R2, R3)"
             };
 
-            int selectedIndex = SelectMenuOption(examples, new MenuForm(2, 2, "Examples", examples, true, ConsoleColor.Cyan));
+            int selectedIndex = SelectMenuOption(examples, new MenuForm(40, 2, "Examples", examples, true, ConsoleColor.Cyan));
 
             try
             {
@@ -100,47 +112,13 @@ namespace URM_Emulator
                 };
 
                 _programManager.LoadProgramFromFile(filePath);
-                ShowMessage("Program Loaded!", ConsoleColor.Green);
+                return GetMessage("Program Loaded!", ConsoleColor.Green);
             }
             catch (Exception ex)
             {
-                ShowMessage($"Error loading file: {ex.Message}", ConsoleColor.Red);
+                return GetMessage($"Error loading file: {ex.Message}", ConsoleColor.Red);
             }
         }
-
-        private void RunProgramEditor()
-        {
-            string[] editorOptions =
-            {
-                " Set register value ",
-                " Reset all registers ",
-                " Choose instructions from file ",
-                " Back "
-            };
-
-            while (true)
-            {
-                RenderCurrentState();
-                int selectedIndex = SelectMenuOption(editorOptions, new MenuForm(2, 2, "Choouse option", editorOptions, true, ConsoleColor.Green));
-
-                switch (selectedIndex)
-                {
-                    case 0:
-                        ShowMessage(_registerManager.EnterRegisters(), ConsoleColor.Green);
-                        break;
-                    case 1:
-                        _urm.ResetRegisters();
-                        ShowMessage("Registers reset.", ConsoleColor.Green);
-                        break;
-                    case 2:
-                        ShowMessage("Feature not implemented yet.", ConsoleColor.Yellow);
-                        break;
-                    case 3:
-                        return;
-                }
-            }
-        }
-
         private void StepByStepExecution()
         {
             var oldRegisters = new Dictionary<int, int>(_urm.Registers);
@@ -222,20 +200,17 @@ namespace URM_Emulator
 
         private void RenderCurrentState()
         {
-            var registersForm = new RegistersForm(2, 8, "Registers", _urm.Registers);
+            var registersForm = new RegistersForm(2, 10, "Registers", _urm.Registers);
             registersForm.Show();
 
             var k = 1;
-            var instructionsForm = new InstructionsForm(2, 13, "Instructions", _urm.Instructions.Select(i => $" [{k++}] {i.ToString()} ").ToArray());
+            var instructionsForm = new InstructionsForm(2, 15, "Instructions", _urm.Instructions.Select(i => $" [{k++}] {i.ToString()} ").ToArray());
             instructionsForm.Show();
         }
 
-        private void ShowMessage(string message, ConsoleColor color)
+        private Form GetMessage(string message, ConsoleColor color)
         {
-            Console.Clear();
-            var resultForm = new Form(2, 2, "Message", new[] { message }, true, color);
-            resultForm.Show();
-            Console.ReadKey();
+            return new Form(40, 2, "Message", new[] { message }, true, color);
         }
     }
 }
